@@ -1,77 +1,53 @@
 <script setup lang="ts">
-import { useAppStore } from '@/stores/app'
-import { useMapStore } from '@/stores/map'
+import { useExamplesStore } from '@/stores/examples'
+import { useRouter } from 'vue-router'
+import type { CategoryId } from '@/types/examples'
 
-const app = useAppStore()
-const map = useMapStore()
+const store = useExamplesStore()
+const router = useRouter()
+
+function goHome() {
+  router.push('/')
+}
+
+function selectCategory(category: CategoryId) {
+  store.setCategory(category)
+  const firstExample = store.currentExamples[0]
+  if (firstExample) {
+    store.selectExample(firstExample)
+    router.push(`/example/${category}/${firstExample.id}`)
+  }
+}
+
+const reservedTabs = [
+  { key: 'threejs', label: 'Three.js', disabled: true },
+  { key: 'webgl', label: 'WebGL', disabled: true },
+]
 </script>
 
 <template>
   <header class="app-header">
     <div class="header-left">
-      <button class="icon-btn" @click="app.toggleSidebar()" title="折叠侧边栏">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <line x1="3" y1="6" x2="21" y2="6" />
-          <line x1="3" y1="12" x2="21" y2="12" />
-          <line x1="3" y1="18" x2="21" y2="18" />
+      <button class="sidebar-toggle" @click="store.toggleSidebar">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12h18M3 6h18M3 18h18" />
         </svg>
       </button>
-      <div class="logo">
-        <svg class="logo-icon" width="28" height="28" viewBox="0 0 48 48" fill="none">
-          <rect width="48" height="48" rx="10" fill="url(#logo-grad)" />
-          <path d="M14 34L24 14L34 34H14Z" fill="white" opacity="0.9" />
-          <path d="M20 28H28L30 34H18L20 28Z" fill="white" />
-          <defs>
-            <linearGradient id="logo-grad" x1="0" y1="0" x2="48" y2="48">
-              <stop offset="0%" stop-color="#4FC3F7" />
-              <stop offset="100%" stop-color="#1565C0" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <span class="logo-text">AI-Cesium</span>
-      </div>
+      <span class="logo" @click="goHome">Cesium Examples</span>
     </div>
-
-    <div class="header-center">
-      <div class="camera-info">
-        <span class="info-item">经度 {{ map.cameraInfo.lng.toFixed(4) }}°</span>
-        <span class="info-sep">|</span>
-        <span class="info-item">纬度 {{ map.cameraInfo.lat.toFixed(4) }}°</span>
-        <span class="info-sep">|</span>
-        <span class="info-item">高度 {{ (map.cameraInfo.height / 1000).toFixed(1) }}km</span>
-        <span class="info-sep">|</span>
-        <span class="info-item">FPS {{ map.fps }}</span>
-      </div>
-    </div>
-
+    <nav class="header-nav">
+      <button v-for="cat in store.categories" :key="cat.id" class="nav-tab"
+        :class="{ active: store.activeCategory === cat.id }" @click="selectCategory(cat.id)">
+        <span class="nav-icon">{{ cat.icon }}</span>
+        {{ cat.name }}
+      </button>
+      <span class="nav-divider">|</span>
+      <button v-for="tab in reservedTabs" :key="tab.key" class="nav-tab disabled" :disabled="tab.disabled">
+        {{ tab.label }}
+      </button>
+    </nav>
     <div class="header-right">
-      <div class="alert-badge" @click="$router.push('/alert')">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-        </svg>
-        <span v-if="app.unreadAlertCount > 0" class="badge">{{ app.unreadAlertCount }}</span>
-      </div>
-      <div class="time-display">
-        {{ new Date().toLocaleTimeString('zh-CN', { hour12: false }) }}
-      </div>
-      <div class="user-avatar">
-        <span>管</span>
-      </div>
+      <span class="example-count">共 {{ store.totalCount }} 个示例</span>
     </div>
   </header>
 </template>
@@ -80,126 +56,108 @@ const map = useMapStore()
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   height: 48px;
   padding: 0 12px;
-  background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 100%);
-  border-bottom: 1px solid rgba(79, 195, 247, 0.15);
-  z-index: 100;
+  background: #111d2e;
+  border-bottom: 1px solid rgba(79, 195, 247, 0.12);
   flex-shrink: 0;
+  z-index: 100;
 }
 
 .header-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
   gap: 8px;
 }
 
-.logo-text {
-  font-size: 16px;
-  font-weight: 700;
-  background: linear-gradient(90deg, #4fc3f7, #29b6f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 1px;
-}
-
-.icon-btn {
+.sidebar-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
   height: 32px;
-  border: none;
-  border-radius: 6px;
   background: transparent;
-  color: #90a4ae;
+  border: 1px solid rgba(79, 195, 247, 0.2);
+  border-radius: 4px;
+  color: #6b8cae;
   cursor: pointer;
   transition: all 0.2s;
 }
-.icon-btn:hover {
-  background: rgba(79, 195, 247, 0.1);
+
+.sidebar-toggle:hover {
   color: #4fc3f7;
+  border-color: #4fc3f7;
 }
 
-.header-center {
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  color: #4fc3f7;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.5px;
+}
+
+.header-nav {
   display: flex;
   align-items: center;
+  gap: 2px;
+  margin-left: 24px;
+  flex: 1;
 }
 
-.camera-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #78909c;
-  font-family: 'Consolas', 'Monaco', monospace;
+.nav-tab {
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #6b8cae;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 0;
+  white-space: nowrap;
 }
 
-.info-sep {
-  color: rgba(255, 255, 255, 0.1);
+.nav-tab:hover {
+  color: #b0bec5;
+  background: rgba(79, 195, 247, 0.06);
+}
+
+.nav-tab.active {
+  color: #4fc3f7;
+  border-bottom-color: #4fc3f7;
+}
+
+.nav-tab.disabled {
+  color: #3a5068;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.nav-tab.disabled:hover {
+  background: transparent;
+}
+
+.nav-icon {
+  margin-right: 4px;
+  font-size: 14px;
+}
+
+.nav-divider {
+  color: #253547;
+  margin: 0 4px;
+  user-select: none;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  margin-left: auto;
 }
 
-.alert-badge {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  color: #90a4ae;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.alert-badge:hover {
-  background: rgba(255, 152, 0, 0.1);
-  color: #ffb74d;
-}
-.badge {
-  position: absolute;
-  top: 0;
-  right: -2px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  font-size: 10px;
-  line-height: 16px;
-  text-align: center;
-  border-radius: 8px;
-  background: #ef5350;
-  color: #fff;
-}
-
-.time-display {
-  font-size: 13px;
-  color: #78909c;
-  font-family: 'Consolas', 'Monaco', monospace;
-}
-
-.user-avatar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #4fc3f7, #1565c0);
-  font-size: 14px;
-  color: #fff;
-  cursor: pointer;
+.example-count {
+  font-size: 12px;
+  color: #4a6580;
 }
 </style>

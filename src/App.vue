@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
-import RightPanel from '@/components/layout/RightPanel.vue'
-import BottomBar from '@/components/layout/BottomBar.vue'
-import CesiumViewer from '@/components/map/CesiumViewer.vue'
+import CodePanel from '@/components/layout/CodePanel.vue'
+import CesiumPreview from '@/components/map/CesiumPreview.vue'
 </script>
 
 <template>
@@ -13,12 +11,10 @@ import CesiumViewer from '@/components/map/CesiumViewer.vue'
     <div class="app-body">
       <AppSidebar />
       <main class="app-main">
-        <CesiumViewer />
-        <RouterView />
+        <CesiumPreview />
       </main>
-      <RightPanel />
     </div>
-    <BottomBar />
+    <CodePanel />
   </div>
 </template>
 
@@ -31,13 +27,12 @@ import CesiumViewer from '@/components/map/CesiumViewer.vue'
   overflow: hidden;
   background: #0a1628;
 }
-
 .app-body {
   display: flex;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
-
 .app-main {
   flex: 1;
   position: relative;

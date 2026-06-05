@@ -22,6 +22,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#app {
+  height: 100%;
+  width: 100%;
+}
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -30,11 +35,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(79, 195, 247, 0.2);
+  background: rgba(79, 195, 247, 0.15);
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(79, 195, 247, 0.4);
+  background: rgba(79, 195, 247, 0.3);
 }
 
 a {
@@ -44,4 +49,8 @@ a {
 
 button {
   font-family: inherit;
+}
+
+.cesium-viewer-bottom {
+  display: none !important;
 }
