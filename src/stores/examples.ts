@@ -5,6 +5,32 @@ import type { TechId, ExampleMeta, DisposeFn } from '@/types/examples'
 import { CATEGORIES, TECHNOLOGIES } from '@/types/examples'
 import * as Cesium from 'cesium'
 
+const moduleLoaders = import.meta.glob('../examples/**/*.{ts,tsx}')
+const sourceLoaders = import.meta.glob('../examples/**/*.{ts,tsx}', {
+  query: '?raw',
+  import: 'default',
+})
+
+function resolveModulePath(example: ExampleMeta, ext: string) {
+  return `../examples/${example.category}/${example.id}.${ext}`
+}
+
+async function loadModule(example: ExampleMeta) {
+  const tsxLoader = moduleLoaders[resolveModulePath(example, 'tsx')]
+  if (tsxLoader) return tsxLoader()
+  const tsLoader = moduleLoaders[resolveModulePath(example, 'ts')]
+  if (tsLoader) return tsLoader()
+  throw new Error(`Module not found: ${example.id}`)
+}
+
+async function loadSource(example: ExampleMeta): Promise<string> {
+  const tsxLoader = sourceLoaders[resolveModulePath(example, 'tsx')]
+  if (tsxLoader) return tsxLoader()
+  const tsLoader = sourceLoaders[resolveModulePath(example, 'ts')]
+  if (tsLoader) return tsLoader()
+  return '// Unable to load source code'
+}
+
 export const useExamplesStore = defineStore('examples', () => {
   const activeTech = ref<TechId>('cesium')
   const activeExample = ref<ExampleMeta | null>(null)
@@ -68,20 +94,14 @@ export const useExamplesStore = defineStore('examples', () => {
     if (!viewer) return
 
     try {
-      const mod = (await import(`@/examples/${example.category}/${example.id}.ts`)) as {
-        init: (v: Cesium.Viewer) => DisposeFn
-      }
+      const mod = await loadModule(example)
       currentDispose = mod.init(viewer)
     } catch (err) {
       console.error('Failed to load example:', example.id, err)
     }
 
-    try {
-      const raw = await import(`@/examples/${example.category}/${example.id}.ts?raw`)
-      activeCode.value = raw.default as string
-    } catch {
-      activeCode.value = '// Unable to load source code'
-    }
+    const sourceCode = await loadSource(example)
+    activeCode.value = sourceCode
   }
 
   function toggleSidebar() {

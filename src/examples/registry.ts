@@ -12,7 +12,7 @@ export const exampleRegistry: ExampleMeta[] = [
   {
     id: 'camera-flyto',
     title: '相机飞行',
-    description: '演示 flyTo 动画飞向指定位置',
+    description: '演示四种飞行模式：瞬移/飞行/实体追踪/轨迹巡航',
     tech: 'cesium',
     category: 'basic',
     tags: ['Camera', 'flyTo', '动画'],
