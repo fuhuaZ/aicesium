@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { theme, themeOverrides } from '@/theme/naive-ui'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import CodePanel from '@/components/layout/CodePanel.vue'
@@ -30,19 +31,21 @@ function onDragStart(e: MouseEvent) {
 </script>
 
 <template>
-  <div class="app-shell" :class="{ 'is-dragging': isDragging }">
-    <AppHeader />
-    <div class="app-body">
-      <AppSidebar />
-      <main class="app-main">
-        <CesiumPreview />
-      </main>
-      <div class="resize-handle" @mousedown="onDragStart">
-        <span class="resize-grip"></span>
+  <n-config-provider :theme="theme" :theme-overrides="themeOverrides">
+    <div class="app-shell" :class="{ 'is-dragging': isDragging }">
+      <AppHeader />
+      <div class="app-body">
+        <AppSidebar />
+        <main class="app-main">
+          <CesiumPreview />
+        </main>
+        <div class="resize-handle" @mousedown="onDragStart">
+          <span class="resize-grip"></span>
+        </div>
+        <CodePanel :style="{ width: panelWidth + 'px' }" />
       </div>
-      <CodePanel :style="{ width: panelWidth + 'px' }" />
     </div>
-  </div>
+  </n-config-provider>
 </template>
 
 <style scoped>
@@ -54,16 +57,19 @@ function onDragStart(e: MouseEvent) {
   overflow: hidden;
   background: #0a1628;
 }
+
 .app-shell.is-dragging {
   cursor: ew-resize;
   user-select: none;
 }
+
 .app-body {
   display: flex;
   flex: 1;
   overflow: hidden;
   min-height: 0;
 }
+
 .app-main {
   flex: 1;
   position: relative;
@@ -71,6 +77,7 @@ function onDragStart(e: MouseEvent) {
   background: #0a1628;
   min-width: 0;
 }
+
 .resize-handle {
   display: flex;
   align-items: center;
@@ -83,9 +90,11 @@ function onDragStart(e: MouseEvent) {
   flex-shrink: 0;
   transition: background 0.15s;
 }
+
 .resize-handle:hover {
   background: rgba(79, 195, 247, 0.1);
 }
+
 .resize-grip {
   display: block;
   width: 3px;
@@ -94,6 +103,7 @@ function onDragStart(e: MouseEvent) {
   border-radius: 2px;
   transition: background 0.15s;
 }
+
 .resize-handle:hover .resize-grip {
   background: rgba(79, 195, 247, 0.5);
 }
