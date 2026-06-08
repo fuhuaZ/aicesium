@@ -46,6 +46,9 @@ module.exports = {
     'vue/attributes-order': 'off',
     'vue/one-component-per-file': 'off',
     'vue/attribute-hyphenation': 'off',
+    'vue/first-attribute-linebreak': 'off',
+    'vue/html-closing-bracket-newline': 'off',
+    'vue/singleline-html-element-content-newline': 'off',
     'vue/script-setup-uses-vars': 'error',
   },
 }

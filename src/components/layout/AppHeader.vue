@@ -20,16 +20,29 @@ function selectTech(tech: TechId) {
   <header class="app-header">
     <div class="header-left">
       <button class="sidebar-toggle" @click="store.toggleSidebar">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
           <path d="M3 12h18M3 6h18M3 18h18" />
         </svg>
       </button>
       <span class="logo" @click="goHome">3D Examples</span>
     </div>
     <nav class="header-nav">
-      <n-button v-for="tech in store.technologies" :key="tech.id"
-        :type="store.activeTech === tech.id ? 'primary' : 'default'" :disabled="!tech.enabled" size="small"
-        :quaternary="store.activeTech !== tech.id" @click="selectTech(tech.id)">
+      <n-button
+        v-for="tech in store.technologies"
+        :key="tech.id"
+        :type="store.activeTech === tech.id ? 'primary' : 'default'"
+        :disabled="!tech.enabled"
+        size="small"
+        :quaternary="store.activeTech !== tech.id"
+        @click="selectTech(tech.id)"
+      >
         <template #icon>
           <span class="nav-icon">{{ tech.icon }}</span>
         </template>

@@ -25,12 +25,12 @@ async function copyCode() {
     <div class="code-header" @click="collapsed = !collapsed">
       <span v-if="collapsed" class="collapsed-title">{{
         store.activeExample?.title || '代码'
-        }}</span>
+      }}</span>
       <template v-else>
         <div class="code-header-left">
           <span class="code-title">{{
             store.activeExample ? store.activeExample.title : '源代码'
-            }}</span>
+          }}</span>
           <span class="code-lang">TypeScript</span>
         </div>
         <div class="code-header-right">

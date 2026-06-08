@@ -31,7 +31,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
       name: area.name,
       polygon: {
         hierarchy: new Cesium.PolygonHierarchy(
-          area.coords.map(([lng, lat]) => Cesium.Cartesian3.fromDegrees(lng, lat)),
+          area.coords.map(([lng, lat]) => Cesium.Cartesian3.fromDegrees(lng, lat))
         ),
         material: area.color,
         outline: true,

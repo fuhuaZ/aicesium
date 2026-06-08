@@ -19,7 +19,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
     lifetime: 16.0,
     emitter: new Cesium.CircleEmitter(0.5),
     modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
-      Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
+      Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0)
     ),
   })
 

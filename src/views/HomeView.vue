@@ -26,7 +26,12 @@ function openCategory(category: CategoryId) {
       </p>
     </div>
     <div class="home-grid">
-      <button v-for="cat in store.categories" :key="cat.id" class="home-card" @click="openCategory(cat.id)">
+      <button
+        v-for="cat in store.categories"
+        :key="cat.id"
+        class="home-card"
+        @click="openCategory(cat.id)"
+      >
         <span class="card-icon">{{ cat.icon }}</span>
         <span class="card-name">{{ cat.name }}</span>
       </button>

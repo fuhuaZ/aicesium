@@ -41,7 +41,7 @@ export const useExamplesStore = defineStore('examples', () => {
           })),
         }
       })
-      .filter(Boolean),
+      .filter(Boolean)
   )
 
   function setViewer(v: Cesium.Viewer) {

@@ -10,12 +10,6 @@ const router = useRouter()
 
 const selectedKeys = computed(() => (store.activeExample ? [store.activeExample.id] : []))
 
-const expandedKeys = computed(() =>
-  store.categories
-    .filter((cat) => store.currentExamples.some((e) => e.category === cat.id))
-    .map((cat) => `cat-${cat.id}`),
-)
-
 function handleNodeSelect(keys: string[], _option: TreeOption[]) {
   const key = keys[0]
   if (!key || key.startsWith('cat-')) return
@@ -31,8 +25,14 @@ function handleNodeSelect(keys: string[], _option: TreeOption[]) {
   <aside class="app-sidebar" :class="{ collapsed: store.sidebarCollapsed }">
     <div class="sidebar-inner">
       <div v-if="!store.sidebarCollapsed" class="sidebar-tree">
-        <n-tree block-line :data="store.treeData" :selected-keys="selectedKeys" :selectable="true" expand-on-click
-          @update:selected-keys="handleNodeSelect" />
+        <n-tree
+          block-line
+          :data="store.treeData"
+          :selected-keys="selectedKeys"
+          :selectable="true"
+          expand-on-click
+          @update:selected-keys="handleNodeSelect"
+        />
       </div>
     </div>
   </aside>

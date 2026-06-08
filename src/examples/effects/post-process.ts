@@ -19,7 +19,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
           }
         }
       `,
-    }),
+    })
   )
 
   viewer.camera.flyTo({

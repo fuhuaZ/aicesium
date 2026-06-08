@@ -14,10 +14,10 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
           }),
           attributes: {
             color: Cesium.ColorGeometryInstanceAttribute.fromColor(
-              Cesium.Color.fromHsl(Math.random(), 0.7, 0.6, 0.8),
+              Cesium.Color.fromHsl(Math.random(), 0.7, 0.6, 0.8)
             ),
           },
-        }),
+        })
       )
     }
   }

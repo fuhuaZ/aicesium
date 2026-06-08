@@ -10,7 +10,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
     position,
     orientation: Cesium.Transforms.headingPitchRollQuaternion(
       position,
-      new Cesium.HeadingPitchRoll(heading, 0, 0),
+      new Cesium.HeadingPitchRoll(heading, 0, 0)
     ),
     model: {
       uri: 'https://raw.githubusercontent.com/CesiumGS/cesium/main/Apps/SampleData/models/CesiumAir/CesiumAir.glb',
