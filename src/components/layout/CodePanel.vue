@@ -47,15 +47,30 @@ async function copyCode() {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+$bg-root: #0a1628;
+$bg-panel: #0d1a2d;
+$cyan: #4fc3f7;
+$cyan-alpha: rgba(79, 195, 247, 0.08);
+$cyan-border: rgba(79, 195, 247, 0.15);
+$text-muted: #6b8cae;
+$text-body: #b0bec5;
+
 .code-panel {
   display: flex;
   flex-direction: column;
-  background: #0a1628;
+  background: $bg-root;
   min-width: 36px;
   flex-shrink: 0;
   overflow: hidden;
-  border-left: 1px solid rgba(79, 195, 247, 0.08);
+  border-left: 1px solid $cyan-alpha;
+
+  &.collapsed .code-header {
+    flex-direction: column;
+    justify-content: center;
+    padding: 8px 4px;
+    height: 100%;
+  }
 }
 
 .code-header {
@@ -67,26 +82,19 @@ async function copyCode() {
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
-  background: #0d1a2d;
-  border-bottom: 1px solid rgba(79, 195, 247, 0.08);
-}
+  background: $bg-panel;
+  border-bottom: 1px solid $cyan-alpha;
 
-.code-header:hover {
-  background: rgba(79, 195, 247, 0.04);
-}
-
-.code-panel.collapsed .code-header {
-  flex-direction: column;
-  justify-content: center;
-  padding: 8px 4px;
-  height: 100%;
+  &:hover {
+    background: rgba(79, 195, 247, 0.04);
+  }
 }
 
 .collapsed-title {
   writing-mode: vertical-rl;
   font-size: 12px;
   font-weight: 600;
-  color: #6b8cae;
+  color: $text-muted;
   letter-spacing: 2px;
   white-space: nowrap;
 }
@@ -100,7 +108,7 @@ async function copyCode() {
 .code-title {
   font-size: 12px;
   font-weight: 600;
-  color: #6b8cae;
+  color: $text-muted;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -110,7 +118,7 @@ async function copyCode() {
   font-size: 10px;
   padding: 2px 6px;
   background: rgba(79, 195, 247, 0.1);
-  color: #4fc3f7;
+  color: $cyan;
   border-radius: 3px;
   flex-shrink: 0;
 }
@@ -124,17 +132,17 @@ async function copyCode() {
 .code-btn {
   padding: 2px 8px;
   font-size: 11px;
-  background: rgba(79, 195, 247, 0.08);
-  border: 1px solid rgba(79, 195, 247, 0.15);
+  background: $cyan-alpha;
+  border: 1px solid $cyan-border;
   border-radius: 3px;
-  color: #6b8cae;
+  color: $text-muted;
   cursor: pointer;
   transition: all 0.15s;
-}
 
-.code-btn:hover {
-  background: rgba(79, 195, 247, 0.15);
-  color: #4fc3f7;
+  &:hover {
+    background: rgba(79, 195, 247, 0.15);
+    color: $cyan;
+  }
 }
 
 .code-body {
@@ -145,8 +153,8 @@ async function copyCode() {
   font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
   font-size: 12px;
   line-height: 1.6;
-  color: #b0bec5;
-  background: #0a1628;
+  color: $text-body;
+  background: $bg-root;
   tab-size: 2;
   white-space: pre;
 }

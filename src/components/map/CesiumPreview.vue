@@ -43,7 +43,7 @@ onUnmounted(() => {
   <div ref="containerRef" class="cesium-preview"></div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .cesium-preview {
   width: 100%;
   height: 100%;

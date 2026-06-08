@@ -39,7 +39,13 @@ function openCategory(category: CategoryId) {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+$cyan: #4fc3f7;
+$cyan-alpha: rgba(79, 195, 247, 0.04);
+$cyan-border: rgba(79, 195, 247, 0.1);
+$text-muted: #4a6580;
+$text-body: #b0bec5;
+
 .home-view {
   display: flex;
   flex-direction: column;
@@ -57,14 +63,14 @@ function openCategory(category: CategoryId) {
 .home-title {
   font-size: 32px;
   font-weight: 700;
-  color: #4fc3f7;
+  color: $cyan;
   margin: 0 0 12px;
   letter-spacing: 1px;
 }
 
 .home-subtitle {
   font-size: 14px;
-  color: #4a6580;
+  color: $text-muted;
   max-width: 520px;
   line-height: 1.6;
 }
@@ -82,19 +88,19 @@ function openCategory(category: CategoryId) {
   align-items: center;
   gap: 8px;
   padding: 24px 32px;
-  background: rgba(79, 195, 247, 0.04);
-  border: 1px solid rgba(79, 195, 247, 0.1);
+  background: $cyan-alpha;
+  border: 1px solid $cyan-border;
   border-radius: 8px;
-  color: #b0bec5;
+  color: $text-body;
   cursor: pointer;
   transition: all 0.2s;
   min-width: 120px;
-}
 
-.home-card:hover {
-  background: rgba(79, 195, 247, 0.08);
-  border-color: rgba(79, 195, 247, 0.3);
-  transform: translateY(-2px);
+  &:hover {
+    background: rgba(79, 195, 247, 0.08);
+    border-color: rgba(79, 195, 247, 0.3);
+    transform: translateY(-2px);
+  }
 }
 
 .card-icon {

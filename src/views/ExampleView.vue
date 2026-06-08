@@ -24,7 +24,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .example-view {
   display: none;
 }

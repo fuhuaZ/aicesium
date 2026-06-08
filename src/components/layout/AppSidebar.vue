@@ -38,18 +38,21 @@ function handleNodeSelect(keys: string[], _option: TreeOption[]) {
   </aside>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+$bg-sidebar: #0d1a2d;
+$border-color: rgba(79, 195, 247, 0.1);
+
 .app-sidebar {
   width: 240px;
   flex-shrink: 0;
-  background: #0d1a2d;
-  border-right: 1px solid rgba(79, 195, 247, 0.1);
+  background: $bg-sidebar;
+  border-right: 1px solid $border-color;
   transition: width 0.25s ease;
   overflow: hidden;
-}
 
-.app-sidebar.collapsed {
-  width: 48px;
+  &.collapsed {
+    width: 48px;
+  }
 }
 
 .sidebar-inner {

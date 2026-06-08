@@ -58,7 +58,11 @@ function selectTech(tech: TechId) {
   </header>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+$cyan: #4fc3f7;
+$text-muted: #6b8cae;
+$text-dim: #4a6580;
+
 .app-header {
   display: flex;
   align-items: center;
@@ -85,20 +89,20 @@ function selectTech(tech: TechId) {
   background: transparent;
   border: 1px solid rgba(79, 195, 247, 0.2);
   border-radius: 4px;
-  color: #6b8cae;
+  color: $text-muted;
   cursor: pointer;
   transition: all 0.2s;
-}
 
-.sidebar-toggle:hover {
-  color: #4fc3f7;
-  border-color: #4fc3f7;
+  &:hover {
+    color: $cyan;
+    border-color: $cyan;
+  }
 }
 
 .logo {
   font-size: 16px;
   font-weight: 700;
-  color: #4fc3f7;
+  color: $cyan;
   cursor: pointer;
   user-select: none;
   letter-spacing: 0.5px;
@@ -131,6 +135,6 @@ function selectTech(tech: TechId) {
 
 .example-count {
   font-size: 12px;
-  color: #4a6580;
+  color: $text-dim;
 }
 </style>

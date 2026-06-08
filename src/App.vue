@@ -48,19 +48,25 @@ function onDragStart(e: MouseEvent) {
   </n-config-provider>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+$bg-root: #0a1628;
+$bg-panel: #0d1a2d;
+$border-color: rgba(79, 195, 247, 0.12);
+$cyan: rgba(79, 195, 247, 0.15);
+$cyan-hover: rgba(79, 195, 247, 0.1);
+
 .app-shell {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
-  background: #0a1628;
-}
+  background: $bg-root;
 
-.app-shell.is-dragging {
-  cursor: ew-resize;
-  user-select: none;
+  &.is-dragging {
+    cursor: ew-resize;
+    user-select: none;
+  }
 }
 
 .app-body {
@@ -74,7 +80,7 @@ function onDragStart(e: MouseEvent) {
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #0a1628;
+  background: $bg-root;
   min-width: 0;
 }
 
@@ -84,15 +90,19 @@ function onDragStart(e: MouseEvent) {
   justify-content: center;
   width: 6px;
   cursor: ew-resize;
-  background: #0d1a2d;
-  border-left: 1px solid rgba(79, 195, 247, 0.15);
+  background: $bg-panel;
+  border-left: 1px solid $cyan;
   border-right: 1px solid rgba(79, 195, 247, 0.08);
   flex-shrink: 0;
   transition: background 0.15s;
-}
 
-.resize-handle:hover {
-  background: rgba(79, 195, 247, 0.1);
+  &:hover {
+    background: $cyan-hover;
+
+    .resize-grip {
+      background: rgba(79, 195, 247, 0.5);
+    }
+  }
 }
 
 .resize-grip {
@@ -102,9 +112,5 @@ function onDragStart(e: MouseEvent) {
   background: rgba(79, 195, 247, 0.25);
   border-radius: 2px;
   transition: background 0.15s;
-}
-
-.resize-handle:hover .resize-grip {
-  background: rgba(79, 195, 247, 0.5);
 }
 </style>
