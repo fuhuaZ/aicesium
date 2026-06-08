@@ -1,12 +1,36 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import CodePanel from '@/components/layout/CodePanel.vue'
 import CesiumPreview from '@/components/map/CesiumPreview.vue'
+
+const panelHeight = ref(200)
+const isDragging = ref(false)
+
+function onDragStart(e: MouseEvent) {
+  isDragging.value = true
+  const startY = e.clientY
+  const startHeight = panelHeight.value
+
+  const onMove = (ev: MouseEvent) => {
+    const delta = startY - ev.clientY
+    panelHeight.value = Math.max(36, Math.min(600, startHeight + delta))
+  }
+
+  const onUp = () => {
+    isDragging.value = false
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+  }
+
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
+}
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" :class="{ 'is-dragging': isDragging }">
     <AppHeader />
     <div class="app-body">
       <AppSidebar />
@@ -14,7 +38,10 @@ import CesiumPreview from '@/components/map/CesiumPreview.vue'
         <CesiumPreview />
       </main>
     </div>
-    <CodePanel />
+    <div class="resize-handle" @mousedown="onDragStart">
+      <span class="resize-grip"></span>
+    </div>
+    <CodePanel :style="{ height: panelHeight + 'px' }" />
   </div>
 </template>
 
@@ -27,6 +54,10 @@ import CesiumPreview from '@/components/map/CesiumPreview.vue'
   overflow: hidden;
   background: #0a1628;
 }
+.app-shell.is-dragging {
+  cursor: ns-resize;
+  user-select: none;
+}
 .app-body {
   display: flex;
   flex: 1;
@@ -38,5 +69,31 @@ import CesiumPreview from '@/components/map/CesiumPreview.vue'
   position: relative;
   overflow: hidden;
   background: #0a1628;
+}
+.resize-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 6px;
+  cursor: ns-resize;
+  background: #0d1a2d;
+  border-top: 1px solid rgba(79, 195, 247, 0.15);
+  border-bottom: 1px solid rgba(79, 195, 247, 0.08);
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.resize-handle:hover {
+  background: rgba(79, 195, 247, 0.1);
+}
+.resize-grip {
+  display: block;
+  width: 32px;
+  height: 3px;
+  background: rgba(79, 195, 247, 0.25);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+.resize-handle:hover .resize-grip {
+  background: rgba(79, 195, 247, 0.5);
 }
 </style>

@@ -21,7 +21,7 @@ async function copyCode() {
 </script>
 
 <template>
-  <div class="code-panel" :class="{ collapsed }">
+  <div class="code-panel" :class="{ collapsed }" :style="collapsed ? { height: '36px' } : undefined">
     <div class="code-header" @click="collapsed = !collapsed">
       <div class="code-header-left">
         <span class="code-title">
@@ -48,13 +48,12 @@ async function copyCode() {
   flex-direction: column;
   border-top: 1px solid rgba(79, 195, 247, 0.15);
   background: #0a1628;
-  height: 200px;
   min-height: 36px;
-  transition: height 0.2s ease;
   flex-shrink: 0;
+  overflow: hidden;
 }
 .code-panel.collapsed {
-  height: 36px;
+  min-height: 36px !important;
 }
 .code-header {
   display: flex;
