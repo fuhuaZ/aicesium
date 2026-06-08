@@ -8,11 +8,9 @@ const route = useRoute()
 const store = useExamplesStore()
 
 onMounted(() => {
-  const category = route.params.category as string
   const exampleId = route.params.exampleId as string
   const example = getExampleById(exampleId)
   if (example) {
-    store.setCategory(category as Parameters<typeof store.setCategory>[0])
     store.selectExample(example)
   }
 })
@@ -30,6 +28,7 @@ onMounted(() => {
 .example-view {
   display: none;
 }
+
 .example-empty {
   position: absolute;
   top: 50%;

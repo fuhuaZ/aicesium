@@ -1,4 +1,14 @@
+import * as Cesium from 'cesium'
+export type TechId = 'cesium' | 'threejs' | 'webgl'
+
 export type CategoryId = 'basic' | 'entity' | 'visualization' | 'effects' | 'terrain'
+
+export interface TechMeta {
+  id: TechId
+  name: string
+  icon: string
+  enabled: boolean
+}
 
 export interface Category {
   id: CategoryId
@@ -10,6 +20,7 @@ export interface ExampleMeta {
   id: string
   title: string
   description: string
+  tech: TechId
   category: CategoryId
   tags: string[]
 }
@@ -21,6 +32,12 @@ export interface DisposeFn {
 export interface ExampleModule {
   init: (viewer: Cesium.Viewer) => DisposeFn
 }
+
+export const TECHNOLOGIES: TechMeta[] = [
+  { id: 'cesium', name: 'Cesium', icon: '🌐', enabled: true },
+  { id: 'threejs', name: 'Three.js', icon: '🧊', enabled: false },
+  { id: 'webgl', name: 'WebGL', icon: '🎨', enabled: false },
+]
 
 export const CATEGORIES: Category[] = [
   { id: 'basic', name: '基础入门', icon: '🏠' },

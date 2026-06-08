@@ -33,6 +33,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
 
   return () => {
     clearTimeout(timerId)
+    viewer.camera.cancelFlight()
     viewer.entities.removeAll()
   }
 }

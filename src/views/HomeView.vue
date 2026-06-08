@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useExamplesStore } from '@/stores/examples'
+import { getExamplesByCategory } from '@/examples/registry'
 import type { CategoryId } from '@/types/examples'
 
 const router = useRouter()
 const store = useExamplesStore()
 
 function openCategory(category: CategoryId) {
-  store.setCategory(category)
-  const firstExample = store.currentExamples[0]
+  const examples = getExamplesByCategory(category, store.activeTech)
+  const firstExample = examples[0]
   if (firstExample) {
     store.selectExample(firstExample)
-    router.push(`/example/${category}/${firstExample.id}`)
+    router.push(`/example/${firstExample.tech}/${category}/${firstExample.id}`)
   }
 }
 </script>
@@ -19,9 +20,9 @@ function openCategory(category: CategoryId) {
 <template>
   <div class="home-view">
     <div class="home-hero">
-      <h1 class="home-title">Cesium Examples</h1>
+      <h1 class="home-title">3D Examples Platform</h1>
       <p class="home-subtitle">
-        Cesium.js API 功能示例集合，涵盖基础入门、实体几何体、数据可视化、特效渲染与地形分析
+        三维技术示例平台，涵盖 Cesium / Three.js / WebGL 等技术的功能示例与最佳实践
       </p>
     </div>
     <div class="home-grid">
@@ -59,7 +60,7 @@ function openCategory(category: CategoryId) {
 .home-subtitle {
   font-size: 14px;
   color: #4a6580;
-  max-width: 480px;
+  max-width: 520px;
   line-height: 1.6;
 }
 

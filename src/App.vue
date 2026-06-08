@@ -5,17 +5,17 @@ import AppSidebar from '@/components/layout/AppSidebar.vue'
 import CodePanel from '@/components/layout/CodePanel.vue'
 import CesiumPreview from '@/components/map/CesiumPreview.vue'
 
-const panelHeight = ref(200)
+const panelWidth = ref(360)
 const isDragging = ref(false)
 
 function onDragStart(e: MouseEvent) {
   isDragging.value = true
-  const startY = e.clientY
-  const startHeight = panelHeight.value
+  const startX = e.clientX
+  const startWidth = panelWidth.value
 
   const onMove = (ev: MouseEvent) => {
-    const delta = startY - ev.clientY
-    panelHeight.value = Math.max(36, Math.min(600, startHeight + delta))
+    const delta = startX - ev.clientX
+    panelWidth.value = Math.max(240, Math.min(800, startWidth + delta))
   }
 
   const onUp = () => {
@@ -37,11 +37,11 @@ function onDragStart(e: MouseEvent) {
       <main class="app-main">
         <CesiumPreview />
       </main>
+      <div class="resize-handle" @mousedown="onDragStart">
+        <span class="resize-grip"></span>
+      </div>
+      <CodePanel :style="{ width: panelWidth + 'px' }" />
     </div>
-    <div class="resize-handle" @mousedown="onDragStart">
-      <span class="resize-grip"></span>
-    </div>
-    <CodePanel :style="{ height: panelHeight + 'px' }" />
   </div>
 </template>
 
@@ -55,7 +55,7 @@ function onDragStart(e: MouseEvent) {
   background: #0a1628;
 }
 .app-shell.is-dragging {
-  cursor: ns-resize;
+  cursor: ew-resize;
   user-select: none;
 }
 .app-body {
@@ -69,16 +69,17 @@ function onDragStart(e: MouseEvent) {
   position: relative;
   overflow: hidden;
   background: #0a1628;
+  min-width: 0;
 }
 .resize-handle {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 6px;
-  cursor: ns-resize;
+  width: 6px;
+  cursor: ew-resize;
   background: #0d1a2d;
-  border-top: 1px solid rgba(79, 195, 247, 0.15);
-  border-bottom: 1px solid rgba(79, 195, 247, 0.08);
+  border-left: 1px solid rgba(79, 195, 247, 0.15);
+  border-right: 1px solid rgba(79, 195, 247, 0.08);
   flex-shrink: 0;
   transition: background 0.15s;
 }
@@ -87,8 +88,8 @@ function onDragStart(e: MouseEvent) {
 }
 .resize-grip {
   display: block;
-  width: 32px;
-  height: 3px;
+  width: 3px;
+  height: 32px;
   background: rgba(79, 195, 247, 0.25);
   border-radius: 2px;
   transition: background 0.15s;

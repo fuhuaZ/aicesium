@@ -21,22 +21,27 @@ async function copyCode() {
 </script>
 
 <template>
-  <div class="code-panel" :class="{ collapsed }" :style="collapsed ? { height: '36px' } : undefined">
+  <div class="code-panel" :class="{ collapsed }" :style="collapsed ? { width: '36px' } : undefined">
     <div class="code-header" @click="collapsed = !collapsed">
-      <div class="code-header-left">
-        <span class="code-title">
-          {{ store.activeExample ? store.activeExample.title : '源代码' }}
-        </span>
-        <span class="code-lang">TypeScript</span>
-      </div>
-      <div class="code-header-right">
-        <button v-if="store.activeCode" class="code-btn" @click.stop="copyCode">
-          {{ copied ? '已复制' : '复制' }}
-        </button>
-        <button class="code-btn toggle-btn">
-          {{ collapsed ? '展开' : '折叠' }}
-        </button>
-      </div>
+      <span v-if="collapsed" class="collapsed-title">{{
+        store.activeExample?.title || '代码'
+        }}</span>
+      <template v-else>
+        <div class="code-header-left">
+          <span class="code-title">{{
+            store.activeExample ? store.activeExample.title : '源代码'
+            }}</span>
+          <span class="code-lang">TypeScript</span>
+        </div>
+        <div class="code-header-right">
+          <button v-if="store.activeCode" class="code-btn" @click.stop="copyCode">
+            {{ copied ? '已复制' : '复制' }}
+          </button>
+          <button class="code-btn">
+            {{ collapsed ? '展开' : '折叠' }}
+          </button>
+        </div>
+      </template>
     </div>
     <pre class="code-body" v-show="!collapsed"><code>{{ displayCode }}</code></pre>
   </div>
@@ -46,50 +51,76 @@ async function copyCode() {
 .code-panel {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(79, 195, 247, 0.15);
   background: #0a1628;
-  min-height: 36px;
+  min-width: 36px;
   flex-shrink: 0;
   overflow: hidden;
+  border-left: 1px solid rgba(79, 195, 247, 0.08);
 }
-.code-panel.collapsed {
-  min-height: 36px !important;
-}
+
 .code-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 36px;
-  padding: 0 12px;
+  padding: 0 10px;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
   background: #0d1a2d;
+  border-bottom: 1px solid rgba(79, 195, 247, 0.08);
 }
+
 .code-header:hover {
   background: rgba(79, 195, 247, 0.04);
 }
+
+.code-panel.collapsed .code-header {
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 4px;
+  height: 100%;
+}
+
+.collapsed-title {
+  writing-mode: vertical-rl;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b8cae;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
 .code-header-left {
   display: flex;
   align-items: center;
   gap: 8px;
 }
+
 .code-title {
   font-size: 12px;
   font-weight: 600;
   color: #6b8cae;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .code-lang {
   font-size: 10px;
   padding: 2px 6px;
   background: rgba(79, 195, 247, 0.1);
   color: #4fc3f7;
   border-radius: 3px;
+  flex-shrink: 0;
 }
+
 .code-header-right {
   display: flex;
   gap: 4px;
+  flex-shrink: 0;
 }
+
 .code-btn {
   padding: 2px 8px;
   font-size: 11px;
@@ -100,10 +131,12 @@ async function copyCode() {
   cursor: pointer;
   transition: all 0.15s;
 }
+
 .code-btn:hover {
   background: rgba(79, 195, 247, 0.15);
   color: #4fc3f7;
 }
+
 .code-body {
   flex: 1;
   overflow: auto;

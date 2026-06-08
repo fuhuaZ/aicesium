@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useExamplesStore } from '@/stores/examples'
 import { useRouter } from 'vue-router'
-import type { CategoryId } from '@/types/examples'
+import type { TechId } from '@/types/examples'
 
 const store = useExamplesStore()
 const router = useRouter()
@@ -10,19 +10,10 @@ function goHome() {
   router.push('/')
 }
 
-function selectCategory(category: CategoryId) {
-  store.setCategory(category)
-  const firstExample = store.currentExamples[0]
-  if (firstExample) {
-    store.selectExample(firstExample)
-    router.push(`/example/${category}/${firstExample.id}`)
-  }
+function selectTech(tech: TechId) {
+  store.setTech(tech)
+  router.push('/')
 }
-
-const reservedTabs = [
-  { key: 'threejs', label: 'Three.js', disabled: true },
-  { key: 'webgl', label: 'WebGL', disabled: true },
-]
 </script>
 
 <template>
@@ -33,18 +24,20 @@ const reservedTabs = [
           <path d="M3 12h18M3 6h18M3 18h18" />
         </svg>
       </button>
-      <span class="logo" @click="goHome">Cesium Examples</span>
+      <span class="logo" @click="goHome">3D Examples</span>
     </div>
     <nav class="header-nav">
-      <button v-for="cat in store.categories" :key="cat.id" class="nav-tab"
-        :class="{ active: store.activeCategory === cat.id }" @click="selectCategory(cat.id)">
-        <span class="nav-icon">{{ cat.icon }}</span>
-        {{ cat.name }}
-      </button>
-      <span class="nav-divider">|</span>
-      <button v-for="tab in reservedTabs" :key="tab.key" class="nav-tab disabled" :disabled="tab.disabled">
-        {{ tab.label }}
-      </button>
+      <n-button v-for="tech in store.technologies" :key="tech.id"
+        :type="store.activeTech === tech.id ? 'primary' : 'default'" :disabled="!tech.enabled" size="small"
+        :quaternary="store.activeTech !== tech.id" @click="selectTech(tech.id)">
+        <template #icon>
+          <span class="nav-icon">{{ tech.icon }}</span>
+        </template>
+        {{ tech.name }}
+        <span v-if="store.techCounts[tech.id]" class="tech-count">
+          {{ store.techCounts[tech.id] }}
+        </span>
+      </n-button>
     </nav>
     <div class="header-right">
       <span class="example-count">共 {{ store.totalCount }} 个示例</span>
@@ -101,53 +94,20 @@ const reservedTabs = [
 .header-nav {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   margin-left: 24px;
   flex: 1;
 }
 
-.nav-tab {
-  padding: 6px 14px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #6b8cae;
-  font-size: 13px;
-  cursor: pointer;
-  transition: all 0.2s;
-  border-radius: 0;
-  white-space: nowrap;
-}
-
-.nav-tab:hover {
-  color: #b0bec5;
-  background: rgba(79, 195, 247, 0.06);
-}
-
-.nav-tab.active {
-  color: #4fc3f7;
-  border-bottom-color: #4fc3f7;
-}
-
-.nav-tab.disabled {
-  color: #3a5068;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.nav-tab.disabled:hover {
-  background: transparent;
-}
-
 .nav-icon {
-  margin-right: 4px;
   font-size: 14px;
+  margin-right: 2px;
 }
 
-.nav-divider {
-  color: #253547;
-  margin: 0 4px;
-  user-select: none;
+.tech-count {
+  font-size: 10px;
+  margin-left: 4px;
+  opacity: 0.7;
 }
 
 .header-right {
