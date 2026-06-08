@@ -31,8 +31,8 @@ function handleNodeSelect(keys: string[], _option: TreeOption[]) {
   <aside class="app-sidebar" :class="{ collapsed: store.sidebarCollapsed }">
     <div class="sidebar-inner">
       <div v-if="!store.sidebarCollapsed" class="sidebar-tree">
-        <n-tree block-line :data="store.treeData" :selected-keys="selectedKeys" :default-expanded-keys="expandedKeys"
-          :selectable="true" @update:selected-keys="handleNodeSelect" />
+        <n-tree block-line :data="store.treeData" :selected-keys="selectedKeys" :selectable="true" expand-on-click
+          @update:selected-keys="handleNodeSelect" />
       </div>
     </div>
   </aside>
