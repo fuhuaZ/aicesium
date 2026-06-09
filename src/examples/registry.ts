@@ -185,6 +185,14 @@ export const exampleRegistry: ExampleMeta[] = [
     category: 'terrain',
     tags: ['量测', '距离', '面积', '高度'],
   },
+  {
+    id: 'video-fusion',
+    title: '视频融合',
+    description: '将视频投射到三维场景中，实现视频与3D模型/地面的融合',
+    tech: 'cesium',
+    category: 'effects',
+    tags: ['视频', '融合', '纹理', '投影'],
+  },
 ]
 
 export function getExamplesByTech(tech: TechId): ExampleMeta[] {

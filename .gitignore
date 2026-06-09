@@ -16,7 +16,8 @@ dist
 dist-ssr
 coverage
 *.local
-
+public/models/
+public/video/
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

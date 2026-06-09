@@ -57,9 +57,7 @@ const entities: Cesium.Entity[] = []
 
 const pathEntity = viewer.entities.add({
   polyline: {
-    positions: Cesium.Cartesian3.fromDegreesArray(
-      PATH_WAYPOINTS.flatMap((w) => [w.lng, w.lat]),
-    ),
+    positions: Cesium.Cartesian3.fromDegreesArray(PATH_WAYPOINTS.flatMap((w) => [w.lng, w.lat])),
     width: 2,
     material: new Cesium.PolylineDashMaterialProperty({
       color: Cesium.Color.fromCssColorString('#ff9800'),
@@ -178,18 +176,12 @@ function doStart() {
         setStatus('未选择实体')
         return
       }
-      const target = entities.find(
-        (e) => e.position && e.label?.text?.getValue() === lm.name,
-      )
+      const target = entities.find((e) => e.position && e.label?.text?.getValue() === lm.name)
       if (target) {
         setStatus(`飞向 ${lm.name}...`)
         viewer.flyTo(target, {
           duration: duration.value,
-          offset: new Cesium.HeadingPitchRange(
-            0,
-            Cesium.Math.toRadians(-30),
-            lm.height,
-          ),
+          offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-30), lm.height),
           complete: () => setStatus(`已到达 ${lm.name}`),
           cancel: () => setStatus('飞行取消'),
         })
