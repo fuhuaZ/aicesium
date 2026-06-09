@@ -18,14 +18,14 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
     'cursor: pointer; display: block; font-size: 12px;',
   ].join('')
 
-  let inspectorMixin: Cesium.CesiumInspectorMixin | null = null
+  let inspector: Cesium.CesiumInspector | null = null
   btn.addEventListener('click', () => {
-    if (inspectorMixin) {
-      inspectorMixin.dropDown?.destroy()
-      inspectorMixin = null
+    if (inspector) {
+      inspector.destroy()
+      inspector = null
       btn.textContent = 'Open Inspector'
     } else {
-      inspectorMixin = viewer.extend(Cesium.viewerCesiumInspectorMixin, {})
+      inspector = new Cesium.CesiumInspector(viewer.container, viewer.scene)
       btn.textContent = 'Close Inspector'
     }
   })
@@ -34,9 +34,7 @@ export function init(viewer: Cesium.Viewer): DisposeFn {
   viewer.container.appendChild(overlay)
 
   return () => {
-    if (inspectorMixin?.dropDown) {
-      inspectorMixin.dropDown.destroy()
-    }
+    inspector?.destroy()
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay)
   }
 }
