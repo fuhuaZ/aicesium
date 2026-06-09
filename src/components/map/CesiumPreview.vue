@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, provide } from 'vue'
 import * as Cesium from 'cesium'
 import { useExamplesStore } from '@/stores/examples'
 
 const containerRef = ref<HTMLDivElement>()
 const store = useExamplesStore()
 let viewer: Cesium.Viewer | null = null
+
+provide('viewer', viewer)
 
 onMounted(() => {
   if (!containerRef.value) return
@@ -40,12 +42,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="cesium-preview"></div>
+  <div ref="containerRef" class="cesium-preview">
+    <component :is="store.activeComponent" v-if="store.activeComponent" :viewer="viewer" />
+  </div>
 </template>
 
 <style scoped lang="scss">
 .cesium-preview {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 </style>

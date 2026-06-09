@@ -1,4 +1,5 @@
-import * as Cesium from 'cesium'
+import type { Component } from 'vue'
+import type * as Cesium from 'cesium'
 export type TechId = 'cesium' | 'threejs' | 'webgl'
 
 export type CategoryId = 'basic' | 'entity' | 'visualization' | 'effects' | 'terrain'
