@@ -92,20 +92,22 @@ function toggleModelTexture() {
 // ===================== 模型贴附 (CustomShader 替换模型纹理) =====================
 function applyModelShader(_video: HTMLVideoElement) {
   if (!modelEntity || modelShader) return
+  const textureUniform = new Cesium.TextureUniform({ url: '/test01.png' })
+  // const textureUniform = new Cesium.TextureUniform({ url: '/video/sucai.mp4' })
 
   modelShader = new Cesium.CustomShader({
     mode: Cesium.CustomShaderMode.MODIFY_MATERIAL,
     fragmentShaderText: `
       void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
-        vec4 videoColor = texture(u_video, fsInput.attributes.texCoord_0);
-        material.diffuse = mix(material.diffuse, videoColor.rgb, 0.7);
+        vec4 textureColor = texture(u_normalMap, fsInput.attributes.texCoord_0);
+        material.diffuse = mix(material.diffuse, textureColor.rgb, 0.9);
         material.alpha = 1.0;
       }
     `,
     uniforms: {
-      u_video: {
+      u_normalMap: {
         type: Cesium.UniformType.SAMPLER_2D,
-        value: _video,
+        value: textureUniform,
       },
     },
   })
@@ -203,12 +205,10 @@ async function loadModel() {
         roll: 0,
       },
     })
-    setTimeout(() => {
-      // 模型加载完成后，若视频已就绪则自动贴附
-      if (videoEl && showModel.value) {
-        applyModelShader(videoEl)
-      }
-    }, 1000)
+    // 模型加载完成后，若视频已就绪则自动贴附
+    if (videoEl && showModel.value) {
+      applyModelShader(videoEl)
+    }
   } catch {
     console.warn('Failed to load Room model')
   }
