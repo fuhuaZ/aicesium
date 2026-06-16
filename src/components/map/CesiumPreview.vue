@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, provide } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
 import { useExamplesStore } from '@/stores/examples'
 
 const containerRef = ref<HTMLDivElement>()
 const store = useExamplesStore()
 let viewer: Cesium.Viewer | null = null
-
-provide('viewer', viewer)
 
 onMounted(() => {
   if (!containerRef.value) return

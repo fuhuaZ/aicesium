@@ -8,6 +8,8 @@ const props = defineProps<{
 
 const viewer = props.viewer
 const btnText = ref('Load Cesium World Terrain')
+let originalTerrainProvider: Cesium.TerrainProvider | null = null
+let originalEnableLighting = false
 
 async function toggleTerrain() {
   try {
@@ -22,6 +24,8 @@ async function toggleTerrain() {
 }
 
 onMounted(() => {
+  originalTerrainProvider = viewer.terrainProvider
+  originalEnableLighting = viewer.scene.globe.enableLighting
   viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(86.92, 27.98, 7000),
     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
@@ -29,7 +33,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // overlay removed automatically by Vue
+  if (originalTerrainProvider) {
+    viewer.terrainProvider = originalTerrainProvider
+  }
+  viewer.scene.globe.enableLighting = originalEnableLighting
 })
 </script>
 

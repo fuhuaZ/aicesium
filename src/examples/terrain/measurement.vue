@@ -100,7 +100,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  handler.destroy()
+  if (!handler.isDestroyed()) {
+    handler.destroy()
+  }
+  points.length = 0
   viewer.entities.removeAll()
 })
 </script>

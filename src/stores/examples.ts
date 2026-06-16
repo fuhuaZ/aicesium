@@ -95,6 +95,10 @@ export const useExamplesStore = defineStore('examples', () => {
     activeTech.value = tech
     activeExample.value = null
     activeComponent.value = null
+    if (viewer) {
+      viewer.entities.removeAll()
+      viewer.scene.primitives.removeAll()
+    }
     activeCode.value = ''
     if (currentDispose) {
       currentDispose()
@@ -109,6 +113,10 @@ export const useExamplesStore = defineStore('examples', () => {
     }
     activeExample.value = example
     activeComponent.value = null
+    if (viewer) {
+      viewer.entities.removeAll()
+      viewer.scene.primitives.removeAll()
+    }
 
     if (!viewer) return
 
