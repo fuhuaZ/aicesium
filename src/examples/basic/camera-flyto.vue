@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import ExamplePanel from '@/components/examples/ExamplePanel.vue'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -238,12 +239,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="cam-panel" @mousedown.stop @click.stop>
-    <!-- 标题栏 -->
-    <div class="cam-header">
-      <span class="cam-title">📷 相机飞行控制</span>
+  <ExamplePanel title="相机飞行" width="320px">
+    <template #header-right>
       <span class="cam-status">{{ statusText }}</span>
-    </div>
+    </template>
 
     <!-- 模式切换 -->
     <div class="cam-mode-bar">
@@ -329,50 +328,15 @@ onUnmounted(() => {
       <button class="cam-btn-start" @click="doStart">开始飞行</button>
       <button class="cam-btn-stop" @click="cancelFlight">停止</button>
     </div>
-  </div>
+  </ExamplePanel>
 </template>
 
 <style scoped lang="scss">
-$cyan: #4fc3f7;
-$bg-panel: rgba(13, 26, 45, 0.94);
-$text-primary: #b0bec5;
-$text-muted: #6b8cae;
-$text-dim: #4a6580;
-
-.cam-panel {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  width: 300px;
-  background: $bg-panel;
-  border: 1px solid rgba($cyan, 0.25);
-  border-radius: 8px;
-  padding: 14px 16px;
-  color: $text-primary;
-  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-  font-size: 13px;
-  z-index: 10;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  user-select: none;
-}
-
-.cam-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.cam-title {
-  font-weight: 700;
-  font-size: 14px;
-  color: $cyan;
-}
+@use '@/styles/example-vars' as vars;
 
 .cam-status {
   font-size: 11px;
-  color: $text-dim;
+  color: vars.$exo-text-dim;
   transition: color 0.2s;
 }
 
@@ -392,18 +356,18 @@ $text-dim: #4a6580;
   border-radius: 4px;
   font-size: 12px;
   background: transparent;
-  color: $text-muted;
+  color: vars.$exo-text-muted;
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    color: $text-primary;
-    background: rgba($cyan, 0.06);
+    color: vars.$exo-text-primary;
+    background: rgba(vars.$exo-cyan, 0.06);
   }
 
   &.active {
-    background: rgba($cyan, 0.18);
-    color: $cyan;
+    background: rgba(vars.$exo-cyan, 0.18);
+    color: vars.$exo-cyan;
     font-weight: 600;
   }
 }
@@ -418,17 +382,17 @@ $text-dim: #4a6580;
 .cam-preset-btn {
   padding: 3px 10px;
   font-size: 12px;
-  background: rgba($cyan, 0.08);
-  border: 1px solid rgba($cyan, 0.2);
+  background: rgba(vars.$exo-cyan, 0.08);
+  border: 1px solid rgba(vars.$exo-cyan, 0.2);
   border-radius: 4px;
-  color: $text-muted;
+  color: vars.$exo-text-muted;
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    background: rgba($cyan, 0.15);
-    color: $cyan;
-    border-color: rgba($cyan, 0.4);
+    background: rgba(vars.$exo-cyan, 0.15);
+    color: vars.$exo-cyan;
+    border-color: rgba(vars.$exo-cyan, 0.4);
   }
 }
 
@@ -445,7 +409,7 @@ $text-dim: #4a6580;
 .cam-label {
   flex: 1;
   font-size: 11px;
-  color: $text-dim;
+  color: vars.$exo-text-dim;
   display: block;
   margin-bottom: 6px;
 }
@@ -457,20 +421,20 @@ $text-dim: #4a6580;
   padding: 4px 6px;
   font-size: 12px;
   background: #0a1628;
-  border: 1px solid rgba($cyan, 0.2);
+  border: 1px solid rgba(vars.$exo-cyan, 0.2);
   border-radius: 4px;
-  color: $text-primary;
+  color: vars.$exo-text-primary;
   outline: none;
   box-sizing: border-box;
 
   &:focus {
-    border-color: $cyan;
+    border-color: vars.$exo-cyan;
   }
 }
 
 .cam-path-hint {
   font-size: 11px;
-  color: $text-muted;
+  color: vars.$exo-text-muted;
   margin-bottom: 8px;
 }
 
@@ -485,15 +449,15 @@ $text-dim: #4a6580;
   padding: 6px 0;
   font-size: 13px;
   font-weight: 600;
-  background: rgba($cyan, 0.15);
-  border: 1px solid rgba($cyan, 0.35);
+  background: rgba(vars.$exo-cyan, 0.15);
+  border: 1px solid rgba(vars.$exo-cyan, 0.35);
   border-radius: 6px;
-  color: $cyan;
+  color: vars.$exo-cyan;
   cursor: pointer;
   transition: all 0.15s;
 
   &:hover {
-    background: rgba($cyan, 0.25);
+    background: rgba(vars.$exo-cyan, 0.25);
   }
 }
 

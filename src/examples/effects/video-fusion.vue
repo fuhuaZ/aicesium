@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import ExamplePanel from '@/components/examples/ExamplePanel.vue'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -98,7 +99,7 @@ function applyModelShader(video: HTMLVideoElement) {
   if (!modelEntity || modelShader) return
 
   // 初始化 canvas（限制尺寸以控制性能）
-  const maxSize = 256
+  const maxSize = 1080
   const vw = video.videoWidth || maxSize
   const vh = video.videoHeight || maxSize
   const ratio = Math.min(maxSize / vw, maxSize / vh, 1)
@@ -362,12 +363,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="vf-panel" @mousedown.stop @click.stop>
-    <!-- 标题 -->
-    <div class="vf-header">
-      <span class="vf-title">视频融合</span>
+  <ExamplePanel title="视频融合" width="320px">
+    <template #header-right>
       <span class="vf-status">{{ playing ? '播放中' : '已暂停' }}</span>
-    </div>
+    </template>
 
     <!-- 时间条 -->
     <div class="vf-timebar">
@@ -415,147 +414,112 @@ onUnmounted(() => {
       视频投射到 <strong>地面</strong> / <strong>竖直屏幕</strong> /
       <strong>Room 模型表面</strong> 上， 可通过复选框独立开关
     </div>
-  </div>
+  </ExamplePanel>
 </template>
 
 <style scoped lang="scss">
-$cyan: #4fc3f7;
-$bg-panel: rgba(13, 26, 45, 0.94);
-$text-primary: #b0bec5;
-$text-muted: #6b8cae;
-$text-dim: #4a6580;
+@use '@/styles/example-vars' as vars;
 
-.vf-panel {
-  position: absolute;
-  bottom: 24px;
-  left: 16px;
-  width: 320px;
-  background: $bg-panel;
-  border: 1px solid rgba($cyan, 0.25);
-  border-radius: 8px;
-  padding: 14px 16px;
-  color: $text-primary;
-  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-  font-size: 13px;
-  z-index: 10;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  user-select: none;
+.vf-status {
+  font-size: 11px;
+  color: vars.$exo-text-dim;
+}
 
-  .vf-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+.vf-timebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
 
-  .vf-title {
-    font-weight: 700;
-    font-size: 14px;
-    color: $cyan;
-  }
+.vf-time-text {
+  font-size: 11px;
+  color: vars.$exo-text-dim;
+  min-width: 32px;
+  text-align: center;
+}
 
-  .vf-status {
-    font-size: 11px;
-    color: $text-dim;
-  }
+.vf-progress {
+  flex: 1;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
 
-  .vf-timebar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .vf-time-text {
-    font-size: 11px;
-    color: $text-dim;
-    min-width: 32px;
-    text-align: center;
-  }
-
-  .vf-progress {
-    flex: 1;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+  .vf-progress-fill {
+    height: 100%;
+    background: vars.$exo-cyan;
     border-radius: 2px;
-    overflow: hidden;
+    transition: width 0.3s linear;
+  }
+}
 
-    .vf-progress-fill {
-      height: 100%;
-      background: $cyan;
-      border-radius: 2px;
-      transition: width 0.3s linear;
-    }
+.vf-controls {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.vf-btn {
+  padding: 5px 12px;
+  font-size: 12px;
+  background: rgba(vars.$exo-cyan, 0.08);
+  border: 1px solid rgba(vars.$exo-cyan, 0.2);
+  border-radius: 4px;
+  color: vars.$exo-text-muted;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover {
+    background: rgba(vars.$exo-cyan, 0.15);
+    color: vars.$exo-cyan;
+    border-color: rgba(vars.$exo-cyan, 0.4);
   }
 
-  .vf-controls {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
+  &.active {
+    background: rgba(vars.$exo-cyan, 0.12);
+    color: vars.$exo-cyan;
+    border-color: rgba(vars.$exo-cyan, 0.3);
   }
+}
 
-  .vf-btn {
-    padding: 5px 12px;
-    font-size: 12px;
-    background: rgba($cyan, 0.08);
-    border: 1px solid rgba($cyan, 0.2);
-    border-radius: 4px;
-    color: $text-muted;
+.vf-btn-play {
+  flex: 1;
+  font-weight: 600;
+  padding: 6px 0;
+}
+
+.vf-toggles {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.vf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: vars.$exo-text-muted;
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    accent-color: vars.$exo-cyan;
+    width: 14px;
+    height: 14px;
     cursor: pointer;
-    transition: all 0.15s;
-
-    &:hover {
-      background: rgba($cyan, 0.15);
-      color: $cyan;
-      border-color: rgba($cyan, 0.4);
-    }
-
-    &.active {
-      background: rgba($cyan, 0.12);
-      color: $cyan;
-      border-color: rgba($cyan, 0.3);
-    }
   }
+}
 
-  .vf-btn-play {
-    flex: 1;
-    font-weight: 600;
-    padding: 6px 0;
-  }
+.vf-hint {
+  font-size: 11px;
+  color: vars.$exo-text-dim;
+  line-height: 1.5;
+  border-top: 1px solid rgba(vars.$exo-cyan, 0.1);
+  padding-top: 8px;
 
-  .vf-toggles {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 8px;
-  }
-
-  .vf-toggle {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: $text-muted;
-    cursor: pointer;
-
-    input[type='checkbox'] {
-      accent-color: $cyan;
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-    }
-  }
-
-  .vf-hint {
-    font-size: 11px;
-    color: $text-dim;
-    line-height: 1.5;
-    border-top: 1px solid rgba($cyan, 0.1);
-    padding-top: 8px;
-
-    strong {
-      color: $text-muted;
-    }
+  strong {
+    color: vars.$exo-text-muted;
   }
 }
 </style>
