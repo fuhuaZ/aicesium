@@ -27,6 +27,12 @@ let screenEntity: Cesium.Entity | null = null
 let modelEntity: Cesium.Entity | null = null
 let modelShader: Cesium.CustomShader | null = null
 
+// ===================== 模型视频纹理 (Canvas + raf) =====================
+let modelTextureCanvas: HTMLCanvasElement | null = null
+let modelTextureCtx: CanvasRenderingContext2D | null = null
+let modelTextureRaf = 0
+let modelTextureSize = { w: 0, h: 0 }
+
 const centerLng = 116.4
 const centerLat = 39.91
 
@@ -81,8 +87,6 @@ function toggleModelTexture() {
   if (!modelEntity) return
 
   if (showModel.value) {
-    console.log('videoEl', videoEl)
-
     if (videoEl) applyModelShader(videoEl)
   } else {
     removeModelShader()
@@ -90,10 +94,32 @@ function toggleModelTexture() {
 }
 
 // ===================== 模型贴附 (CustomShader 替换模型纹理) =====================
-function applyModelShader(_video: HTMLVideoElement) {
+function applyModelShader(video: HTMLVideoElement) {
   if (!modelEntity || modelShader) return
-  const textureUniform = new Cesium.TextureUniform({ url: '/test01.png' })
-  // const textureUniform = new Cesium.TextureUniform({ url: '/video/sucai.mp4' })
+
+  // 初始化 canvas（限制尺寸以控制性能）
+  const maxSize = 256
+  const vw = video.videoWidth || maxSize
+  const vh = video.videoHeight || maxSize
+  const ratio = Math.min(maxSize / vw, maxSize / vh, 1)
+  const cw = Math.max(1, Math.floor(vw * ratio))
+  const ch = Math.max(1, Math.floor(vh * ratio))
+
+  modelTextureCanvas = document.createElement('canvas')
+  modelTextureCanvas.width = cw
+  modelTextureCanvas.height = ch
+  modelTextureCtx = modelTextureCanvas.getContext('2d', { willReadFrequently: true })
+  modelTextureSize = { w: cw, h: ch }
+
+  // 占位 1×1 像素，确保 shader 可创建
+  const placeholder = new Uint8Array([0, 0, 0, 0])
+  const initialUniform = new Cesium.TextureUniform({
+    typedArray: placeholder,
+    width: 1,
+    height: 1,
+    pixelFormat: Cesium.PixelFormat.RGBA,
+    pixelDatatype: Cesium.PixelDatatype.UNSIGNED_BYTE,
+  })
 
   modelShader = new Cesium.CustomShader({
     mode: Cesium.CustomShaderMode.MODIFY_MATERIAL,
@@ -107,14 +133,58 @@ function applyModelShader(_video: HTMLVideoElement) {
     uniforms: {
       u_normalMap: {
         type: Cesium.UniformType.SAMPLER_2D,
-        value: textureUniform,
+        value: initialUniform,
       },
     },
   })
   ;(modelEntity.model as any).customShader = modelShader
+
+  startModelTextureLoop(video)
+}
+
+function startModelTextureLoop(video: HTMLVideoElement) {
+  const tick = () => {
+    if (
+      modelShader &&
+      modelTextureCtx &&
+      modelTextureCanvas &&
+      video.readyState >= 2 &&
+      !video.paused &&
+      !video.ended
+    ) {
+      const { w, h } = modelTextureSize
+      try {
+        modelTextureCtx.drawImage(video, 0, 0, w, h)
+        const imageData = modelTextureCtx.getImageData(0, 0, w, h)
+        const newUniform = new Cesium.TextureUniform({
+          typedArray: new Uint8Array(imageData.data.buffer),
+          width: w,
+          height: h,
+          pixelFormat: Cesium.PixelFormat.RGBA,
+          pixelDatatype: Cesium.PixelDatatype.UNSIGNED_BYTE,
+        })
+        ;(modelShader as any).setUniform('u_normalMap', newUniform)
+      } catch {
+        // 跨域或解码异常时跳过该帧
+      }
+    }
+    modelTextureRaf = requestAnimationFrame(tick)
+  }
+  modelTextureRaf = requestAnimationFrame(tick)
+}
+
+function stopModelTextureLoop() {
+  if (modelTextureRaf) {
+    cancelAnimationFrame(modelTextureRaf)
+    modelTextureRaf = 0
+  }
+  modelTextureCanvas = null
+  modelTextureCtx = null
+  modelTextureSize = { w: 0, h: 0 }
 }
 
 function removeModelShader() {
+  stopModelTextureLoop()
   if (!modelEntity) return
   modelShader = null
   ;(modelEntity.model as any).customShader = undefined
@@ -206,7 +276,7 @@ async function loadModel() {
       },
     })
     // 模型加载完成后，若视频已就绪则自动贴附
-    if (videoEl && showModel.value) {
+    if (videoEl && videoEl.readyState >= 2 && showModel.value) {
       applyModelShader(videoEl)
     }
   } catch {
@@ -216,50 +286,77 @@ async function loadModel() {
 
 // ===================== 生命周期 =====================
 onMounted(() => {
-  // 创建视频元素
+  // 1) 创建视频元素，先不设 src
   videoEl = document.createElement('video')
-  videoEl.src = '/video/sucai.mp4'
   videoEl.loop = loop.value
   videoEl.muted = muted.value
   videoEl.crossOrigin = 'anonymous'
   videoEl.playsInline = true
 
+  // 2) 定义回调
+  const onLoadedData = () => {
+    if (!videoEl) return
+    groundEntities.length = 0
+    createGroundProjection(videoEl)
+    screenEntity = createScreenEntity(videoEl)
+    videoEl.play().catch(() => {
+      // 浏览器可能阻止自动播放，用户手动点播放
+    })
+    // 视频就绪后，若模型已加载且未贴附，则补贴附
+    if (showModel.value && modelEntity && !modelShader) {
+      applyModelShader(videoEl)
+    }
+  }
+  const onLoadedMeta = () => {
+    if (videoEl) duration.value = videoEl.duration || 0
+  }
+
+  // 3) 先注册全部监听器
   videoEl.addEventListener('play', () => {
     playing.value = true
   })
   videoEl.addEventListener('pause', () => {
     playing.value = false
   })
-  videoEl.addEventListener('loadedmetadata', () => {
-    duration.value = videoEl!.duration || 0
-  })
+  videoEl.addEventListener('loadedmetadata', onLoadedMeta)
   videoEl.addEventListener('ended', () => {
     if (!loop.value) playing.value = false
   })
+  videoEl.addEventListener('loadeddata', onLoadedData)
 
-  // 先加载视频元数据，再创建场景元素
-  videoEl.addEventListener('loadeddata', () => {
-    groundEntities.length = 0
-    createGroundProjection(videoEl!)
-    screenEntity = createScreenEntity(videoEl!)
-    videoEl!.play().catch(() => {
-      // 浏览器可能阻止自动播放，用户手动点播放
-    })
-  })
-
+  // 4) 后赋 src 并 load
+  videoEl.src = '/video/sucai.mp4'
   videoEl.load()
+
+  // 5) 缓存兜底：若已就绪 (HAVE_CURRENT_DATA=2)，同步触发回调
+  if (videoEl.readyState >= 2) {
+    onLoadedMeta()
+    onLoadedData()
+  }
+
   updateTime()
   loadModel()
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(timeRaf)
-  if (videoEl) {
-    videoEl.pause()
-    videoEl.removeAttribute('src')
-    videoEl.load()
-    videoEl = null
+  timeRaf = 0
+
+  stopModelTextureLoop()
+
+  const v = videoEl
+  videoEl = null
+  if (v) {
+    v.pause()
+    v.src = ''
+    v.load()
   }
+
+  screenEntity = null
+  modelEntity = null
+  modelShader = null
+  groundEntities.length = 0
+
   viewer.entities.removeAll()
 })
 </script>
