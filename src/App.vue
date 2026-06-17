@@ -5,6 +5,7 @@ import AppHeader from '@/components/layout/AppHeader.vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import CodePanel from '@/components/layout/CodePanel.vue'
 import CesiumPreview from '@/components/map/CesiumPreview.vue'
+import GlobalWatermark from '@/components/watermark/GlobalWatermark.vue'
 
 const panelWidth = ref(360)
 const isDragging = ref(false)
@@ -32,6 +33,7 @@ function onDragStart(e: MouseEvent) {
 
 <template>
   <n-config-provider :theme="theme" :theme-overrides="themeOverrides">
+    <GlobalWatermark />
     <div class="app-shell" :class="{ 'is-dragging': isDragging }">
       <AppHeader />
       <div class="app-body">
