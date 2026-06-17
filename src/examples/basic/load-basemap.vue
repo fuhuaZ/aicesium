@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import * as Cesium from 'cesium'
 import ExamplePanel from '@/components/examples/ExamplePanel.vue'
-import { NRadioGroup, NRadio, NSlider } from 'naive-ui'
+import { NRadioGroup, NRadio, NSlider, NSelect } from 'naive-ui'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -11,28 +11,24 @@ const props = defineProps<{
 const viewer = props.viewer
 
 // ===================== 状态 =====================
-type ProviderKey = 'bing-aerial' | 'bing-road' | 'osm' | 'arcgis'
+type ProviderKey = 'osm' | 'arcgis'
+type TerrainKey = 'ellipsoid' | 'cesium'
 
-const selectedProvider = ref<ProviderKey>('bing-aerial')
+const terrainOptions = [
+  { label: 'Ellipsoid（默认）', value: 'ellipsoid' },
+  { label: 'Cesium World Terrain', value: 'cesium' },
+]
+const selectedProvider = ref<ProviderKey>('arcgis')
+const selectedTerrain = ref<TerrainKey>('ellipsoid')
 const opacity = ref(1)
 const brightness = ref(1)
 const errorMsg = ref('')
+const terrainErrorMsg = ref('')
 const isLoading = ref(false)
-
-// 保存初始底图用于恢复
-let originalLayers: Cesium.ImageryLayer[] = []
 
 // ===================== Provider 创建 =====================
 async function createProvider(key: ProviderKey): Promise<Cesium.ImageryProvider> {
   switch (key) {
-    case 'bing-aerial':
-      return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', {
-        mapStyle: Cesium.BingMapsStyle.AERIAL,
-      })
-    case 'bing-road':
-      return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', {
-        mapStyle: Cesium.BingMapsStyle.ROAD,
-      })
     case 'osm':
       return Promise.resolve(
         new Cesium.OpenStreetMapImageryProvider({
@@ -63,9 +59,41 @@ async function switchBasemap(key: ProviderKey) {
   }
 }
 
-// ===================== 监听 provider 切换 =====================
+// ===================== 切换地形 =====================
+async function switchTerrain(key: TerrainKey) {
+  terrainErrorMsg.value = ''
+  if (key === 'ellipsoid') {
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+    return
+  }
+
+  const token = import.meta.env.VITE_CESIUM_ION_TOKEN
+  if (!token) {
+    terrainErrorMsg.value = '需要配置 VITE_CESIUM_ION_TOKEN'
+    selectedTerrain.value = 'ellipsoid'
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+    return
+  }
+
+  try {
+    Cesium.Ion.defaultAccessToken = token
+    viewer.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1, {
+      requestVertexNormals: true,
+    })
+  } catch (e: any) {
+    terrainErrorMsg.value = e?.message || '地形加载失败'
+    selectedTerrain.value = 'ellipsoid'
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+  }
+}
+
+// ===================== 监听 provider / terrain 切换 =====================
 watch(selectedProvider, (key) => {
   switchBasemap(key)
+})
+
+watch(selectedTerrain, (key) => {
+  switchTerrain(key)
 })
 
 // ===================== 监听透明度 / 亮度 =====================
@@ -81,30 +109,7 @@ watch(brightness, (val) => {
 
 // ===================== 生命周期 =====================
 onMounted(() => {
-  // 保存初始底图
-  const count = viewer.imageryLayers.length
-  for (let i = 0; i < count; i++) {
-    originalLayers.push(viewer.imageryLayers.get(i))
-  }
-  // 切换到默认底图
   switchBasemap(selectedProvider.value)
-})
-
-onUnmounted(() => {
-  // 恢复初始底图
-  viewer.imageryLayers.removeAll()
-  for (const layer of originalLayers) {
-    try {
-      viewer.imageryLayers.add(layer.provider, viewer.imageryLayers.length)
-      const added = viewer.imageryLayers.get(viewer.imageryLayers.length - 1)
-      added.alpha = layer.alpha
-      added.brightness = layer.brightness
-      added.show = layer.show
-    } catch {
-      // 恢复失败时静默处理
-    }
-  }
-  originalLayers = []
 })
 </script>
 
@@ -112,11 +117,13 @@ onUnmounted(() => {
   <ExamplePanel title="底图切换" width="300px">
     <div class="bm-row">
       <n-radio-group v-model:value="selectedProvider" size="small">
-        <n-radio value="bing-aerial" :disabled="isLoading">Bing Aerial</n-radio>
-        <n-radio value="bing-road" :disabled="isLoading">Bing Road</n-radio>
-        <n-radio value="osm" :disabled="isLoading">OpenStreetMap</n-radio>
         <n-radio value="arcgis" :disabled="isLoading">ArcGIS Imagery</n-radio>
+        <n-radio value="osm" :disabled="isLoading">OpenStreetMap</n-radio>
       </n-radio-group>
+    </div>
+    <div class="bm-row">
+      <span class="bm-label">地形</span>
+      <n-select v-model:value="selectedTerrain" :options="terrainOptions" size="small" />
     </div>
     <div class="bm-row">
       <span class="bm-label">透明度</span>
@@ -130,6 +137,7 @@ onUnmounted(() => {
     </div>
     <div v-if="isLoading" class="bm-status">加载中…</div>
     <div v-if="errorMsg" class="bm-error">{{ errorMsg }}</div>
+    <div v-if="terrainErrorMsg" class="bm-error">{{ terrainErrorMsg }}</div>
   </ExamplePanel>
 </template>
 
