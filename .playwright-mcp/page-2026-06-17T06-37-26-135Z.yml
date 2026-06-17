@@ -1,0 +1,83 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - generic [ref=e10] [cursor=pointer]: 3D Examples
+    - navigation [ref=e11]:
+      - button "🌐 Cesium 24" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: 🌐
+        - generic [ref=e15]:
+          - text: Cesium
+          - generic [ref=e16]: "24"
+      - button "🧊 Three.js" [disabled] [ref=e17]:
+        - generic [ref=e19]: 🧊
+        - generic [ref=e20]: Three.js
+      - button "🎨 WebGL" [disabled] [ref=e21]:
+        - generic [ref=e23]: 🎨
+        - generic [ref=e24]: WebGL
+    - generic [ref=e26]: 共 24 个示例
+  - generic [ref=e27]:
+    - complementary [ref=e28]:
+      - generic [active] [ref=e31]:
+        - generic [ref=e33]:
+          - img [ref=e37] [cursor=pointer]
+          - generic [ref=e40] [cursor=pointer]: 🏠 基础入门 (5)
+        - generic [ref=e101] [cursor=pointer]: 加载底图
+        - generic [ref=e105] [cursor=pointer]: 相机飞行
+        - generic [ref=e109] [cursor=pointer]: 坐标拾取
+        - generic [ref=e113] [cursor=pointer]: 鼠标事件
+        - generic [ref=e117] [cursor=pointer]: 调试面板
+        - generic [ref=e42]:
+          - img [ref=e46] [cursor=pointer]
+          - generic [ref=e49] [cursor=pointer]: 📐 实体与几何体 (6)
+        - generic [ref=e51]:
+          - img [ref=e55] [cursor=pointer]
+          - generic [ref=e58] [cursor=pointer]: 📊 数据可视化 (4)
+        - generic [ref=e60]:
+          - img [ref=e64] [cursor=pointer]
+          - generic [ref=e67] [cursor=pointer]: ✨ 特效与渲染 (5)
+        - generic [ref=e69]:
+          - img [ref=e73] [cursor=pointer]
+          - generic [ref=e76] [cursor=pointer]: 🌍 地形与分析 (4)
+    - main [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e118]:
+          - generic [ref=e120]: 底图切换
+          - generic [ref=e121]:
+            - generic [ref=e123]:
+              - generic [ref=e124] [cursor=pointer]:
+                - generic [ref=e125]:
+                  - radio "Bing Aerial" [checked]
+                - generic [ref=e127]: Bing Aerial
+              - generic [ref=e128] [cursor=pointer]:
+                - generic [ref=e129]:
+                  - radio "Bing Road"
+                - generic [ref=e131]: Bing Road
+              - generic [ref=e132] [cursor=pointer]:
+                - generic [ref=e133]:
+                  - radio "OpenStreetMap"
+                - generic [ref=e135]: OpenStreetMap
+              - generic [ref=e136] [cursor=pointer]:
+                - generic [ref=e137]:
+                  - radio "ArcGIS Imagery"
+                - generic [ref=e139]: ArcGIS Imagery
+            - generic [ref=e140]:
+              - generic [ref=e141]: 透明度
+              - slider [ref=e146] [cursor=pointer]
+              - generic [ref=e148]: "1.00"
+            - generic [ref=e149]:
+              - generic [ref=e150]: 亮度
+              - slider [ref=e155] [cursor=pointer]
+              - generic [ref=e157]: "1.0"
+            - generic [ref=e158]: options.key is required, actual value was undefined
+        - button "View Home" [ref=e84] [cursor=pointer]
+    - generic [ref=e89]:
+      - generic [ref=e90] [cursor=pointer]:
+        - generic [ref=e91]:
+          - generic [ref=e92]: 加载底图
+          - generic [ref=e93]: TypeScript
+        - generic [ref=e94]:
+          - button "复制" [ref=e159]
+          - button "折叠" [ref=e95]
+      - code [ref=e97]: "<script setup lang=\"ts\"> import { ref, watch, onMounted, onUnmounted } from 'vue' import * as Cesium from 'cesium' import ExamplePanel from '@/components/examples/ExamplePanel.vue' import { NRadioGroup, NRadio, NSlider } from 'naive-ui' const props = defineProps<{ viewer: Cesium.Viewer }>() const viewer = props.viewer // ===================== 状态 ===================== type ProviderKey = 'bing-aerial' | 'bing-road' | 'osm' | 'arcgis' const selectedProvider = ref<ProviderKey>('bing-aerial') const opacity = ref(1) const brightness = ref(1) const errorMsg = ref('') const isLoading = ref(false) // 保存初始底图用于恢复 let originalLayers: Cesium.ImageryLayer[] = [] // ===================== Provider 创建 ===================== async function createProvider(key: ProviderKey): Promise<Cesium.ImageryProvider> { switch (key) { case 'bing-aerial': return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', { mapStyle: Cesium.BingMapsStyle.AERIAL, }) case 'bing-road': return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', { mapStyle: Cesium.BingMapsStyle.ROAD, }) case 'osm': return Promise.resolve( new Cesium.OpenStreetMapImageryProvider({ url: 'https://tile.openstreetmap.org/', }), ) case 'arcgis': return Cesium.ArcGisMapServerImageryProvider.fromUrl( 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer', ) } } // ===================== 切换底图 ===================== async function switchBasemap(key: ProviderKey) { isLoading.value = true errorMsg.value = '' try { viewer.imageryLayers.removeAll() const provider = await createProvider(key) const layer = viewer.imageryLayers.addImageryProvider(provider) layer.alpha = opacity.value layer.brightness = brightness.value } catch (e: any) { errorMsg.value = e?.message || '底图加载失败' } finally { isLoading.value = false } } // ===================== 监听 provider 切换 ===================== watch(selectedProvider, (key) => { switchBasemap(key) }) // ===================== 监听透明度 / 亮度 ===================== watch(opacity, (val) => { const layer = viewer.imageryLayers.get(0) if (layer) layer.alpha = val }) watch(brightness, (val) => { const layer = viewer.imageryLayers.get(0) if (layer) layer.brightness = val }) // ===================== 生命周期 ===================== onMounted(() => { // 保存初始底图 const count = viewer.imageryLayers.length for (let i = 0; i < count; i++) { originalLayers.push(viewer.imageryLayers.get(i)) } // 切换到默认底图 switchBasemap(selectedProvider.value) }) onUnmounted(() => { // 恢复初始底图 viewer.imageryLayers.removeAll() for (const layer of originalLayers) { try { viewer.imageryLayers.add(layer.provider, viewer.imageryLayers.length) const added = viewer.imageryLayers.get(viewer.imageryLayers.length - 1) added.alpha = layer.alpha added.brightness = layer.brightness added.show = layer.show } catch { // 恢复失败时静默处理 } } originalLayers = [] }) </script> <template> <ExamplePanel title=\"底图切换\" width=\"300px\"> <div class=\"bm-row\"> <n-radio-group v-model:value=\"selectedProvider\" size=\"small\"> <n-radio value=\"bing-aerial\" :disabled=\"isLoading\">Bing Aerial</n-radio> <n-radio value=\"bing-road\" :disabled=\"isLoading\">Bing Road</n-radio> <n-radio value=\"osm\" :disabled=\"isLoading\">OpenStreetMap</n-radio> <n-radio value=\"arcgis\" :disabled=\"isLoading\">ArcGIS Imagery</n-radio> </n-radio-group> </div> <div class=\"bm-row\"> <span class=\"bm-label\">透明度</span> <n-slider v-model:value=\"opacity\" :min=\"0\" :max=\"1\" :step=\"0.05\" /> <span class=\"bm-val\">{{ opacity.toFixed(2) }}</span> </div> <div class=\"bm-row\"> <span class=\"bm-label\">亮度</span> <n-slider v-model:value=\"brightness\" :min=\"0.5\" :max=\"2\" :step=\"0.1\" /> <span class=\"bm-val\">{{ brightness.toFixed(1) }}</span> </div> <div v-if=\"isLoading\" class=\"bm-status\">加载中…</div> <div v-if=\"errorMsg\" class=\"bm-error\">{{ errorMsg }}</div> </ExamplePanel> </template> <style scoped lang=\"scss\"> @use '@/styles/example-vars' as vars; .bm-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; } .bm-label { font-size: 12px; color: vars.$exo-text-muted; min-width: 40px; flex-shrink: 0; } .bm-val { font-size: 11px; color: vars.$exo-text-dim; min-width: 36px; text-align: right; flex-shrink: 0; } .bm-status { font-size: 11px; color: vars.$exo-text-dim; text-align: center; margin-bottom: 6px; } .bm-error { font-size: 11px; color: #ef5350; padding: 6px 8px; background: rgba(239, 83, 80, 0.1); border: 1px solid rgba(239, 83, 80, 0.25); border-radius: 4px; } </style>"

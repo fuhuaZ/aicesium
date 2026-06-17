@@ -1,0 +1,46 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - generic [ref=e10] [cursor=pointer]: 3D Examples
+    - navigation [ref=e11]:
+      - button "🌐 Cesium 24" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: 🌐
+        - generic [ref=e15]:
+          - text: Cesium
+          - generic [ref=e16]: "24"
+      - button "🧊 Three.js" [disabled] [ref=e17]:
+        - generic [ref=e19]: 🧊
+        - generic [ref=e20]: Three.js
+      - button "🎨 WebGL" [disabled] [ref=e21]:
+        - generic [ref=e23]: 🎨
+        - generic [ref=e24]: WebGL
+    - generic [ref=e26]: 共 24 个示例
+  - generic [ref=e27]:
+    - complementary [ref=e28]:
+      - generic [ref=e31]:
+        - generic [ref=e33]:
+          - img [ref=e37] [cursor=pointer]
+          - generic [ref=e40] [cursor=pointer]: 🏠 基础入门 (5)
+        - generic [ref=e42]:
+          - img [ref=e46] [cursor=pointer]
+          - generic [ref=e49] [cursor=pointer]: 📐 实体与几何体 (6)
+        - generic [ref=e51]:
+          - img [ref=e55] [cursor=pointer]
+          - generic [ref=e58] [cursor=pointer]: 📊 数据可视化 (4)
+        - generic [ref=e60]:
+          - img [ref=e64] [cursor=pointer]
+          - generic [ref=e67] [cursor=pointer]: ✨ 特效与渲染 (5)
+        - generic [ref=e69]:
+          - img [ref=e73] [cursor=pointer]
+          - generic [ref=e76] [cursor=pointer]: 🌍 地形与分析 (4)
+    - main [ref=e77]:
+      - button "View Home" [ref=e84] [cursor=pointer]
+    - generic [ref=e89]:
+      - generic [ref=e90] [cursor=pointer]:
+        - generic [ref=e91]:
+          - generic [ref=e92]: 源代码
+          - generic [ref=e93]: TypeScript
+        - button "折叠" [ref=e95]
+      - code [ref=e97]: // 请从左侧选择一个示例

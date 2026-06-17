@@ -1,0 +1,67 @@
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - generic [ref=e6]:
+      - button [ref=e7] [cursor=pointer]:
+        - img [ref=e8]
+      - generic [ref=e10] [cursor=pointer]: 3D Examples
+    - navigation [ref=e11]:
+      - button "🌐 Cesium 24" [ref=e12] [cursor=pointer]:
+        - generic [ref=e14]: 🌐
+        - generic [ref=e15]:
+          - text: Cesium
+          - generic [ref=e16]: "24"
+      - button "🧊 Three.js" [disabled] [ref=e17]:
+        - generic [ref=e19]: 🧊
+        - generic [ref=e20]: Three.js
+      - button "🎨 WebGL" [disabled] [ref=e21]:
+        - generic [ref=e23]: 🎨
+        - generic [ref=e24]: WebGL
+    - generic [ref=e26]: 共 24 个示例
+  - generic [ref=e27]:
+    - complementary [ref=e28]:
+      - generic [active] [ref=e31]:
+        - generic [ref=e33]:
+          - img [ref=e37] [cursor=pointer]
+          - generic [ref=e40] [cursor=pointer]: 🏠 基础入门 (5)
+        - generic [ref=e101] [cursor=pointer]: 加载底图
+        - generic [ref=e105] [cursor=pointer]: 相机飞行
+        - generic [ref=e109] [cursor=pointer]: 坐标拾取
+        - generic [ref=e113] [cursor=pointer]: 鼠标事件
+        - generic [ref=e117] [cursor=pointer]: 调试面板
+        - generic [ref=e42]:
+          - img [ref=e46] [cursor=pointer]
+          - generic [ref=e49] [cursor=pointer]: 📐 实体与几何体 (6)
+        - generic [ref=e51]:
+          - img [ref=e55] [cursor=pointer]
+          - generic [ref=e58] [cursor=pointer]: 📊 数据可视化 (4)
+        - generic [ref=e60]:
+          - img [ref=e64] [cursor=pointer]
+          - generic [ref=e67] [cursor=pointer]: ✨ 特效与渲染 (5)
+        - generic [ref=e69]:
+          - img [ref=e73] [cursor=pointer]
+          - generic [ref=e76] [cursor=pointer]: 🌍 地形与分析 (4)
+    - main [ref=e77]:
+      - generic [ref=e78]:
+        - generic [ref=e205]:
+          - generic [ref=e207]: 场景调试
+          - generic [ref=e208]:
+            - generic [ref=e209]:
+              - generic [ref=e210]: Inspector
+              - button "打开" [ref=e211] [cursor=pointer]:
+                - generic [ref=e212]: 打开
+            - generic [ref=e213]:
+              - generic [ref=e214]: 显示帧率
+              - switch [ref=e215]
+            - generic [ref=e218]:
+              - generic [ref=e219]: 显示视锥
+              - switch [ref=e220]
+        - button "View Home" [ref=e84] [cursor=pointer]
+    - generic [ref=e89]:
+      - generic [ref=e90] [cursor=pointer]:
+        - generic [ref=e91]:
+          - generic [ref=e92]: 调试面板
+          - generic [ref=e93]: TypeScript
+        - generic [ref=e94]:
+          - button "复制" [ref=e159]
+          - button "折叠" [ref=e95]
+      - code [ref=e97]: "<script setup lang=\"ts\"> import { ref, onUnmounted } from 'vue' import * as Cesium from 'cesium' import ExamplePanel from '@/components/examples/ExamplePanel.vue' import { NButton, NSwitch } from 'naive-ui' const props = defineProps<{ viewer: Cesium.Viewer }>() const viewer = props.viewer let inspector: Cesium.CesiumInspector | null = null const isOpen = ref(false) const showFPS = ref(false) const showFrustum = ref(false) // Save original values const origFPS = viewer.scene.debugShowFramesPerSecond const origFrustum = viewer.scene.debugShowFrustums function toggleInspector() { if (inspector) { inspector.destroy() inspector = null isOpen.value = false } else { inspector = new Cesium.CesiumInspector(viewer.container, viewer.scene) isOpen.value = true } } function toggleFPS(val: boolean) { showFPS.value = val viewer.scene.debugShowFramesPerSecond = val } function toggleFrustum(val: boolean) { showFrustum.value = val viewer.scene.debugShowFrustums = val } onUnmounted(() => { inspector?.destroy() viewer.scene.debugShowFramesPerSecond = origFPS viewer.scene.debugShowFrustums = origFrustum }) </script> <template> <ExamplePanel title=\"场景调试\" width=\"260px\"> <div class=\"ci-row\"> <span class=\"ci-label\">Inspector</span> <n-button size=\"small\" @click=\"toggleInspector\"> {{ isOpen ? '关闭' : '打开' }} </n-button> </div> <div class=\"ci-row\"> <span class=\"ci-label\">显示帧率</span> <n-switch :value=\"showFPS\" @update:value=\"toggleFPS\" /> </div> <div class=\"ci-row\"> <span class=\"ci-label\">显示视锥</span> <n-switch :value=\"showFrustum\" @update:value=\"toggleFrustum\" /> </div> </ExamplePanel> </template> <style scoped lang=\"scss\"> @use '@/styles/example-vars' as vars; .ci-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; } .ci-label { font-size: 12px; color: vars.$exo-text-muted; } </style>"
