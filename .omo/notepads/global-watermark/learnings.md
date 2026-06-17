@@ -1,0 +1,108 @@
+# GlobalWatermark.vue - Learnings
+
+## Created: 2026-06-17
+
+### Implementation Notes
+- File: `src/components/watermark/GlobalWatermark.vue`
+- Full-screen Canvas-based diagonal watermark showing live time (`YYYY-MM-DD HH:mm:ss`)
+- Uses `<script setup lang="ts">` + `<Teleport to="body">` pattern to escape `.app-shell`'s `overflow: hidden`
+- Canvas buffer dimensions = `window.innerWidth * dpr` Ã— `window.innerHeight * dpr`
+- Uses `ctx.scale(dpr, dpr)` so all drawing coordinates operate in logical (CSS) pixel space
+- Draw loop: 5 columns Ã— 4 rows, each cell centered + rotated -22Â° via `ctx.save/restore`
+- Font: `16px Arial, Helvetica, sans-serif` (logical size, scaled by DPR via context transform)
+- Color: `rgba(180, 180, 180, 0.15)` â€” faint gray, visible on dark `#0a1628` background
+- Interval: `1000ms` via `setInterval` (no `requestAnimationFrame`)
+- Page Visibility API pauses interval on tab hide, resumes + redraws on tab show
+- Resize handler: recalculates canvas buffer + redraws
+- Cleanup in `onUnmounted`: clears interval, removes resize + visibilitychange listeners
+- Print hidden via `@media print { canvas { display: none; } }`
+- Z-index `9999` exceeds AppHeader's `z-index: 100`
+
+### Design Decisions
+- No `ctx.scale(dpr, dpr)` alternative: considered, but scaling the context keeps font sizes and coordinates cleaner in logical space
+- Not using `requestAnimationFrame` as requested â€” `setInterval(1000ms)` matches the 1-second time resolution
+- Grid centered within viewport (`(i+0.5)*spacing`) so outer text has balanced margins
+- `data-watermark` attribute enables CSS selection or testing without class coupling
+
+### Integration: App.vue (Task 2)
+- Added `import GlobalWatermark from '@/components/watermark/GlobalWatermark.vue'` after CesiumPreview import (line 8)
+- Added `<GlobalWatermark />` as sibling to `<div class="app-shell">` inside `<n-config-provider>` (line 36)
+- `n-config-provider` renders watermark before app-shell; Teleport-to-body handles DOM placement
+
+---
+
+### F2: Code Quality Review â€” 2026-06-17
+
+**Build**: âœ… PASS (`vite build` completes in ~2s, exit 0, no new errors)
+- Pre-existing warning: `[INEFFECTIVE_DYNAMIC_IMPORT] src/examples/registry.ts` â€” unrelated to GlobalWatermark
+
+**GlobalWatermark.vue** (114 lines):
+
+| Check | Result | Detail |
+|-------|--------|--------|
+| Cleanup (onUnmounted) | âœ… PASS | `clearInterval` L82, `removeEventListener('resize')` L85, `removeEventListener('visibilitychange')` L86 |
+| Unused imports | âœ… CLEAN | `ref`, `onMounted`, `onUnmounted` â€” all used |
+| console.log / debug | âœ… NONE | No debug statements |
+| Type assertions | âœ… NONE | Zero `as` casts; generics on `ref<>` and `ReturnType<>` are structural, not assertions |
+| Stubs / TODOs | âœ… NONE | File is production-complete |
+
+**App.vue** (118 lines):
+
+| Check | Result | Detail |
+|-------|--------|--------|
+| Unused imports | âœ… CLEAN | 7 imports (`ref`, `theme`, `themeOverrides`, `AppHeader`, `AppSidebar`, `CodePanel`, `CesiumPreview`, `GlobalWatermark`) â€” all used |
+| console.log / debug | âœ… NONE | No debug statements |
+| Type assertions | âœ… NONE | No `as` casts |
+| GlobalWatermark integration | âœ… OK | Imported L8, rendered L36 inside `n-config-provider` |
+
+**Output**: `Build PASS | Cleanup COMPLETE | Imports CLEAN | VERDICT: âœ… ALL CHECKS PASSED`
+
+---
+
+## F4. Scope Fidelity Check ¡ª 2026-06-17 14:35:44
+
+### Files Changed
+| # | File | Status | Expected? |
+|---|------|--------|-----------|
+| 1 | src/App.vue | Modified (+2 lines: import + template) | ? Yes |
+| 2 | src/components/watermark/GlobalWatermark.vue | New (untracked) | ? Yes |
+| 3 | components.d.ts | Modified (+2 lines: auto-generated type decl) | ?? Auto-gen side effect |
+
+### Unaccounted / Untracked
+- .playwright-mcp/ ¡ª untracked directory, unrelated to waterfall feature (Playwright browser artifacts)
+
+### Must NOT Have Items ¡ª Verified
+| Check | Result |
+|-------|--------|
+| package.json touched | ? Clean ¡ª no changes |
+| index.html touched | ? Clean ¡ª no changes |
+| CesiumPreview changed | ? Clean |
+| AppHeader changed | ? Clean |
+| AppSidebar changed | ? Clean |
+| CodePanel changed | ? Clean |
+| ExamplePanel changed | ? Clean |
+| Layout components changed | ? Clean |
+| New dependencies added | ? Clean |
+
+### App.vue Diff (verified correct)
+\\\diff
++import GlobalWatermark from '@/components/watermark/GlobalWatermark.vue'
+...
++    <GlobalWatermark />
+\\\
+
+### components.d.ts Diff (auto-generated, unplugin-vue-components)
+\\\diff
++    GlobalWatermark: typeof import('./src/components/watermark/GlobalWatermark.vue')['default']
++  const GlobalWatermark: typeof import('./src/components/watermark/GlobalWatermark.vue')['default']
+\\\
+
+### Watermark Directory
+Only one file: src/components/watermark/GlobalWatermark.vue ?
+
+### VERDICT
+\\\
+Files [expected 2/actual 3] | Creep [CLEAN ¡ª components.d.ts is auto-generated by unplugin-vue-components, not manual] | Unaccounted [NOTE: .playwright-mcp/ untracked, unrelated] | VERDICT: PASS ?
+\\\
+
+**Note:** components.d.ts is an auto-generated file maintained by unplugin-vue-components. Its change is a deterministic, expected side effect of adding any new Vue component under src/components/. Not considered scope creep.
