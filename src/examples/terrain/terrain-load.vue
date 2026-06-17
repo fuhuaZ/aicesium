@@ -1,31 +1,66 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import ExamplePanel from '@/components/examples/ExamplePanel.vue'
+import { NSelect, NSwitch } from 'naive-ui'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
 }>()
 
 const viewer = props.viewer
-const btnText = ref('Load Cesium World Terrain')
+
+// ===================== 响应式状态 =====================
+const terrainOptions = [
+  { label: 'Ellipsoid（默认）', value: 'ellipsoid' },
+  { label: 'Cesium World Terrain', value: 'cesium' },
+]
+const terrainType = ref<string>('ellipsoid')
+const enableLighting = ref(false)
+const waterReflection = ref(false)
+const ionError = ref('')
+
 let originalTerrainProvider: Cesium.TerrainProvider | null = null
 let originalEnableLighting = false
+let originalShowGroundAtmosphere = false
 
-async function toggleTerrain() {
+// ===================== 地形切换 =====================
+async function loadCesiumTerrain() {
   try {
+    ionError.value = ''
     viewer.terrainProvider = await Cesium.CesiumTerrainProvider.fromIonAssetId(1, {
       requestVertexNormals: true,
     })
-    viewer.scene.globe.enableLighting = true
-    btnText.value = 'Terrain Loaded'
   } catch {
-    btnText.value = 'Load Failed (Need Token)'
+    ionError.value = '需要 Ion Token'
+    terrainType.value = 'ellipsoid'
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
   }
 }
 
+watch(terrainType, (val) => {
+  if (val === 'cesium') {
+    loadCesiumTerrain()
+  } else {
+    ionError.value = ''
+    viewer.terrainProvider = new Cesium.EllipsoidTerrainProvider()
+  }
+})
+
+// ===================== 开关监听 =====================
+watch(enableLighting, (val) => {
+  viewer.scene.globe.enableLighting = val
+})
+
+watch(waterReflection, (val) => {
+  viewer.scene.globe.showGroundAtmosphere = val
+})
+
+// ===================== 生命周期 =====================
 onMounted(() => {
   originalTerrainProvider = viewer.terrainProvider
   originalEnableLighting = viewer.scene.globe.enableLighting
+  originalShowGroundAtmosphere = viewer.scene.globe.showGroundAtmosphere
   viewer.camera.flyTo({
     destination: Cesium.Cartesian3.fromDegrees(86.92, 27.98, 7000),
     orientation: { heading: 0, pitch: Cesium.Math.toRadians(-45), roll: 0 },
@@ -37,64 +72,64 @@ onUnmounted(() => {
     viewer.terrainProvider = originalTerrainProvider
   }
   viewer.scene.globe.enableLighting = originalEnableLighting
+  viewer.scene.globe.showGroundAtmosphere = originalShowGroundAtmosphere
 })
 </script>
 
 <template>
-  <div class="tl-overlay">
-    <strong>Terrain Loading Example</strong><br /><br />
-    <code class="tl-code">
-      viewer.terrainProvider = await Cesium.CesiumTerrainProvider<br />
-      &nbsp;&nbsp;.fromIonAssetId(1);<br />
-      new Cesium.CesiumTerrainProvider({<br />
-      &nbsp;&nbsp;url: 'https://.../tileset.json'<br />
-      }) </code
-    ><br />
-    <span class="tl-desc"> Load global terrain DEM data, enable lighting/water reflection </span>
-    <br /><br />
-    <button class="tl-btn" @click="toggleTerrain">{{ btnText }}</button>
-  </div>
+  <ExamplePanel title="地形加载" width="280px">
+    <template v-if="ionError">
+      <div class="tl-error">{{ ionError }}</div>
+    </template>
+    <div class="tl-row">
+      <span class="tl-label">地形</span>
+      <n-select v-model:value="terrainType" :options="terrainOptions" size="small" />
+    </div>
+    <div class="tl-row tl-row-inline">
+      <span class="tl-label">启用光照</span>
+      <n-switch v-model:value="enableLighting" size="small" />
+    </div>
+    <div class="tl-row tl-row-inline">
+      <span class="tl-label">水面反射</span>
+      <n-switch v-model:value="waterReflection" size="small" />
+    </div>
+  </ExamplePanel>
 </template>
 
 <style scoped lang="scss">
-.tl-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.85);
-  color: #4fc3f7;
-  padding: 16px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  border: 1px solid rgba(79, 195, 247, 0.3);
-  max-width: 420px;
-  line-height: 1.6;
-  text-align: center;
-  z-index: 10;
-}
+@use '@/styles/example-vars' as vars;
 
-.tl-code {
-  color: #ffa726;
-  font-size: 12px;
-}
+.tl-row {
+  margin-bottom: 10px;
 
-.tl-desc {
-  font-size: 12px;
-  color: #6b8cae;
-}
-
-.tl-btn {
-  padding: 6px 14px;
-  background: rgba(79, 195, 247, 0.15);
-  border: 1px solid rgba(79, 195, 247, 0.3);
-  border-radius: 4px;
-  color: #4fc3f7;
-  cursor: pointer;
-  font-size: 12px;
-
-  &:hover {
-    background: rgba(79, 195, 247, 0.25);
+  &:last-child {
+    margin-bottom: 0;
   }
+}
+
+.tl-row-inline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tl-label {
+  display: block;
+  font-size: 12px;
+  color: vars.$exo-text-muted;
+  margin-bottom: 4px;
+}
+
+.tl-row-inline .tl-label {
+  margin-bottom: 0;
+}
+
+.tl-error {
+  font-size: 13px;
+  color: #ff8a65;
+  line-height: 1.5;
+  text-align: center;
+  padding: 8px 0;
+  margin-bottom: 8px;
 }
 </style>

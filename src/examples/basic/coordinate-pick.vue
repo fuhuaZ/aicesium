@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import { NTag, NButton } from 'naive-ui'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -88,16 +89,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="cp-panel"
-    @mousedown.stop
-    @click.stop
-  >
+  <div class="cp-panel" @mousedown.stop @click.stop>
     <div class="cp-header">
       <span class="cp-title">坐标拾取</span>
-      <n-tag size="small" :bordered="false" type="info">
-        {{ pickCount }} 次
-      </n-tag>
+      <n-tag size="small" :bordered="false" type="info"> {{ pickCount }} 次 </n-tag>
     </div>
 
     <div v-if="lastCoord" class="cp-coord">
@@ -114,9 +109,7 @@ onUnmounted(() => {
         <span class="cp-value">{{ lastCoord.height }} m</span>
       </div>
     </div>
-    <div v-else class="cp-empty">
-      点击地球表面拾取坐标
-    </div>
+    <div v-else class="cp-empty">点击地球表面拾取坐标</div>
 
     <div class="cp-footer">
       <n-button size="tiny" type="warning" ghost :disabled="pickCount === 0" @click="clearPicks">

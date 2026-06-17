@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import ExamplePanel from '@/components/examples/ExamplePanel.vue'
+import { NRadioGroup, NRadio, NSlider } from 'naive-ui'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -24,15 +26,13 @@ let originalLayers: Cesium.ImageryLayer[] = []
 async function createProvider(key: ProviderKey): Promise<Cesium.ImageryProvider> {
   switch (key) {
     case 'bing-aerial':
-      return Cesium.BingMapsImageryProvider.fromUrl(
-        'https://dev.virtualearth.net',
-        { mapStyle: Cesium.BingMapsStyle.AERIAL },
-      )
+      return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', {
+        mapStyle: Cesium.BingMapsStyle.AERIAL,
+      })
     case 'bing-road':
-      return Cesium.BingMapsImageryProvider.fromUrl(
-        'https://dev.virtualearth.net',
-        { mapStyle: Cesium.BingMapsStyle.ROAD },
-      )
+      return Cesium.BingMapsImageryProvider.fromUrl('https://dev.virtualearth.net', {
+        mapStyle: Cesium.BingMapsStyle.ROAD,
+      })
     case 'osm':
       return Promise.resolve(
         new Cesium.OpenStreetMapImageryProvider({
@@ -109,171 +109,63 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bm-panel" @mousedown.stop @click.stop>
-    <!-- 标题 -->
-    <div class="bm-header">
-      <span class="bm-title">底图切换</span>
-      <span v-if="isLoading" class="bm-status">加载中…</span>
+  <ExamplePanel title="底图切换" width="300px">
+    <div class="bm-row">
+      <n-radio-group v-model:value="selectedProvider" size="small">
+        <n-radio value="bing-aerial" :disabled="isLoading">Bing Aerial</n-radio>
+        <n-radio value="bing-road" :disabled="isLoading">Bing Road</n-radio>
+        <n-radio value="osm" :disabled="isLoading">OpenStreetMap</n-radio>
+        <n-radio value="arcgis" :disabled="isLoading">ArcGIS Imagery</n-radio>
+      </n-radio-group>
     </div>
-
-    <!-- Provider 选择 -->
-    <div class="bm-providers">
-      <label
-        v-for="opt in ([
-          { key: 'bing-aerial', label: 'Bing Aerial' },
-          { key: 'bing-road', label: 'Bing Road' },
-          { key: 'osm', label: 'OpenStreetMap' },
-          { key: 'arcgis', label: 'ArcGIS Imagery' },
-        ] as const)"
-        :key="opt.key"
-        class="bm-radio"
-      >
-        <input
-          type="radio"
-          :value="opt.key"
-          v-model="selectedProvider"
-          :disabled="isLoading"
-        />
-        <span>{{ opt.label }}</span>
-      </label>
+    <div class="bm-row">
+      <span class="bm-label">透明度</span>
+      <n-slider v-model:value="opacity" :min="0" :max="1" :step="0.05" />
+      <span class="bm-val">{{ opacity.toFixed(2) }}</span>
     </div>
-
-    <!-- 透明度 -->
-    <div class="bm-slider-row">
-      <span class="bm-slider-label">透明度</span>
-      <input
-        type="range"
-        class="bm-slider"
-        min="0"
-        max="1"
-        step="0.05"
-        v-model.number="opacity"
-      />
-      <span class="bm-slider-value">{{ opacity.toFixed(2) }}</span>
+    <div class="bm-row">
+      <span class="bm-label">亮度</span>
+      <n-slider v-model:value="brightness" :min="0.5" :max="2" :step="0.1" />
+      <span class="bm-val">{{ brightness.toFixed(1) }}</span>
     </div>
-
-    <!-- 亮度 -->
-    <div class="bm-slider-row">
-      <span class="bm-slider-label">亮度</span>
-      <input
-        type="range"
-        class="bm-slider"
-        min="0.5"
-        max="2"
-        step="0.1"
-        v-model.number="brightness"
-      />
-      <span class="bm-slider-value">{{ brightness.toFixed(1) }}</span>
-    </div>
-
-    <!-- 错误提示 -->
-    <div v-if="errorMsg" class="bm-error">
-      {{ errorMsg }}
-    </div>
-  </div>
+    <div v-if="isLoading" class="bm-status">加载中…</div>
+    <div v-if="errorMsg" class="bm-error">{{ errorMsg }}</div>
+  </ExamplePanel>
 </template>
 
 <style scoped lang="scss">
-$cyan: #4fc3f7;
-$bg-panel: rgba(13, 26, 45, 0.94);
-$text-primary: #b0bec5;
-$text-muted: #6b8cae;
-$text-dim: #4a6580;
-
-.bm-panel {
-  position: absolute;
-  bottom: 24px;
-  left: 16px;
-  width: 280px;
-  background: $bg-panel;
-  border: 1px solid rgba($cyan, 0.25);
-  border-radius: 8px;
-  padding: 14px 16px;
-  color: $text-primary;
-  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
-  font-size: 13px;
-  z-index: 10;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  user-select: none;
-
-  .bm-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .bm-title {
-    font-weight: 700;
-    font-size: 14px;
-    color: $cyan;
-  }
-
-  .bm-status {
-    font-size: 11px;
-    color: $text-dim;
-  }
-
-  .bm-providers {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .bm-radio {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: $text-muted;
-    cursor: pointer;
-
-    input[type='radio'] {
-      accent-color: $cyan;
-      width: 14px;
-      height: 14px;
-      cursor: pointer;
-    }
-  }
-
-  .bm-slider-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .bm-slider-label {
-    font-size: 11px;
-    color: $text-dim;
-    min-width: 36px;
-  }
-
-  .bm-slider {
-    flex: 1;
-    accent-color: $cyan;
-    height: 4px;
-    cursor: pointer;
-  }
-
-  .bm-slider-value {
-    font-size: 11px;
-    color: $text-muted;
-    min-width: 32px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .bm-error {
-    margin-top: 6px;
-    padding: 6px 8px;
-    font-size: 11px;
-    color: #ef5350;
-    background: rgba(239, 83, 80, 0.1);
-    border: 1px solid rgba(239, 83, 80, 0.25);
-    border-radius: 4px;
-  }
+@use '@/styles/example-vars' as vars;
+.bm-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.bm-label {
+  font-size: 12px;
+  color: vars.$exo-text-muted;
+  min-width: 40px;
+  flex-shrink: 0;
+}
+.bm-val {
+  font-size: 11px;
+  color: vars.$exo-text-dim;
+  min-width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.bm-status {
+  font-size: 11px;
+  color: vars.$exo-text-dim;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.bm-error {
+  font-size: 11px;
+  color: #ef5350;
+  padding: 6px 8px;
+  background: rgba(239, 83, 80, 0.1);
+  border: 1px solid rgba(239, 83, 80, 0.25);
+  border-radius: 4px;
 }
 </style>

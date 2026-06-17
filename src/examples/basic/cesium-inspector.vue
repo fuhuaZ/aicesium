@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
+import ExamplePanel from '@/components/examples/ExamplePanel.vue'
+import { NButton, NSwitch } from 'naive-ui'
 
 const props = defineProps<{
   viewer: Cesium.Viewer
@@ -9,54 +11,71 @@ const props = defineProps<{
 const viewer = props.viewer
 
 let inspector: Cesium.CesiumInspector | null = null
-const btnText = ref('Open Inspector')
+const isOpen = ref(false)
+const showFPS = ref(false)
+const showFrustum = ref(false)
+
+// Save original values
+const origFPS = viewer.scene.debugShowFramesPerSecond
+const origFrustum = viewer.scene.debugShowFrustums
 
 function toggleInspector() {
   if (inspector) {
     inspector.destroy()
     inspector = null
-    btnText.value = 'Open Inspector'
+    isOpen.value = false
   } else {
     inspector = new Cesium.CesiumInspector(viewer.container, viewer.scene)
-    btnText.value = 'Close Inspector'
+    isOpen.value = true
   }
+}
+
+function toggleFPS(val: boolean) {
+  showFPS.value = val
+  viewer.scene.debugShowFramesPerSecond = val
+}
+
+function toggleFrustum(val: boolean) {
+  showFrustum.value = val
+  viewer.scene.debugShowFrustums = val
 }
 
 onUnmounted(() => {
   inspector?.destroy()
+  viewer.scene.debugShowFramesPerSecond = origFPS
+  viewer.scene.debugShowFrustums = origFrustum
 })
 </script>
 
 <template>
-  <div class="inspector-overlay">
-    <span>Cesium Inspector: view draw calls and primitives</span>
-    <button class="inspector-btn" @click="toggleInspector">{{ btnText }}</button>
-  </div>
+  <ExamplePanel title="场景调试" width="260px">
+    <div class="ci-row">
+      <span class="ci-label">Inspector</span>
+      <n-button size="small" @click="toggleInspector">
+        {{ isOpen ? '关闭' : '打开' }}
+      </n-button>
+    </div>
+    <div class="ci-row">
+      <span class="ci-label">显示帧率</span>
+      <n-switch :value="showFPS" @update:value="toggleFPS" />
+    </div>
+    <div class="ci-row">
+      <span class="ci-label">显示视锥</span>
+      <n-switch :value="showFrustum" @update:value="toggleFrustum" />
+    </div>
+  </ExamplePanel>
 </template>
 
 <style scoped lang="scss">
-.inspector-overlay {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  background: rgba(0, 0, 0, 0.8);
-  color: #4fc3f7;
-  padding: 12px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  border: 1px solid rgba(79, 195, 247, 0.3);
+@use '@/styles/example-vars' as vars;
+.ci-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
 }
-
-.inspector-btn {
-  margin-top: 8px;
-  padding: 6px 14px;
-  background: rgba(79, 195, 247, 0.15);
-  border: 1px solid rgba(79, 195, 247, 0.3);
-  border-radius: 4px;
-  color: #4fc3f7;
-  cursor: pointer;
-  display: block;
+.ci-label {
   font-size: 12px;
+  color: vars.$exo-text-muted;
 }
 </style>

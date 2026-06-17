@@ -19,6 +19,7 @@ coverage
 public/models/
 public/video/
 # Editor directories and files
+.omo
 .vscode/*
 !.vscode/extensions.json
 .idea
