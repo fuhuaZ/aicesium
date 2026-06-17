@@ -95,9 +95,8 @@ export const useExamplesStore = defineStore('examples', () => {
     activeTech.value = tech
     activeExample.value = null
     activeComponent.value = null
-    if (viewer) {
+    if (viewer && !viewer.isDestroyed()) {
       viewer.entities.removeAll()
-      viewer.scene.primitives.removeAll()
     }
     activeCode.value = ''
     if (currentDispose) {
@@ -113,12 +112,11 @@ export const useExamplesStore = defineStore('examples', () => {
     }
     activeExample.value = example
     activeComponent.value = null
-    if (viewer) {
+    if (viewer && !viewer.isDestroyed()) {
       viewer.entities.removeAll()
-      viewer.scene.primitives.removeAll()
     }
 
-    if (!viewer) return
+    if (!viewer || viewer.isDestroyed()) return
 
     // 优先尝试 .vue 组件
     try {
