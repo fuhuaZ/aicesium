@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
 import ExamplePanel from '@/components/examples/ExamplePanel.vue'
 import { NSlider, NColorPicker } from 'naive-ui'
@@ -7,26 +7,56 @@ import { NSlider, NColorPicker } from 'naive-ui'
 const props = defineProps<{ viewer: Cesium.Viewer }>()
 const scene = props.viewer.scene
 
-const particleSystem = new Cesium.ParticleSystem({
-  image:
-    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVQYlWNg+M9AAiYmBn5GRgY0AAB/AAv+2m/rAAAAAElFTkSuQmCC',
-  startColor: Cesium.Color.DEEPSKYBLUE.withAlpha(0.8),
-  endColor: Cesium.Color.WHITE.withAlpha(0.1),
-  startScale: 1.0,
-  endScale: 4.0,
-  minimumParticleLife: 1.0,
-  maximumParticleLife: 3.0,
-  minimumSpeed: 20.0,
-  maximumSpeed: 40.0,
-  emissionRate: 30,
-  lifetime: 16.0,
-  emitter: new Cesium.CircleEmitter(0.5),
-  modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
-    Cesium.Cartesian3.fromDegrees(116.4, 39.9, 0),
-  ),
-})
+let particleSystem: Cesium.ParticleSystem | null = null
+let cancelled = false
 
-scene.primitives.add(particleSystem)
+onMounted(async () => {
+  let height = 100
+
+  try {
+    const cartographic = Cesium.Cartographic.fromDegrees(116.4, 39.9)
+    const [updated] = await Cesium.sampleTerrainMostDetailed(
+      props.viewer.terrainProvider,
+      [cartographic],
+    )
+    if (!cancelled && updated && props.viewer && !props.viewer.isDestroyed()) {
+      height = (updated.height ?? 0) + 100
+    } else {
+      return
+    }
+  } catch {
+    // fallback
+  }
+
+  if (cancelled || !props.viewer || props.viewer.isDestroyed()) return
+
+  particleSystem = new Cesium.ParticleSystem({
+    image:
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVQYlWNg+M9AAiYmBn5GRgY0AAB/AAv+2m/rAAAAAElFTkSuQmCC',
+    imageSize: new Cesium.Cartesian2(25, 25),
+    startColor: Cesium.Color.DEEPSKYBLUE.withAlpha(0.8),
+    endColor: Cesium.Color.WHITE.withAlpha(0.1),
+    startScale: 1.0,
+    endScale: 4.0,
+    minimumParticleLife: 1.0,
+    maximumParticleLife: 3.0,
+    minimumSpeed: 20.0,
+    maximumSpeed: 40.0,
+    emissionRate: 30,
+    lifetime: 16.0,
+    loop: true,
+    emitter: new Cesium.CircleEmitter(10),
+    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
+      Cesium.Cartesian3.fromDegrees(116.4, 39.9, height),
+    ),
+  })
+
+  scene.primitives.add(particleSystem)
+
+  props.viewer.camera.flyTo({
+    destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 600),
+  })
+})
 
 // Reactive params
 const emissionRate = ref(30)
@@ -40,39 +70,39 @@ const startScale = ref(1.0)
 const endScale = ref(4.0)
 
 watch(emissionRate, (v) => {
-  particleSystem.emissionRate = v
+  if (particleSystem) particleSystem.emissionRate = v
 })
 watch(minSpeed, (v) => {
-  particleSystem.minimumSpeed = v
+  if (particleSystem) particleSystem.minimumSpeed = v
 })
 watch(maxSpeed, (v) => {
-  particleSystem.maximumSpeed = v
+  if (particleSystem) particleSystem.maximumSpeed = v
 })
 watch(minLife, (v) => {
-  particleSystem.minimumParticleLife = v
+  if (particleSystem) particleSystem.minimumParticleLife = v
 })
 watch(maxLife, (v) => {
-  particleSystem.maximumParticleLife = v
+  if (particleSystem) particleSystem.maximumParticleLife = v
 })
 watch(startColor, (v) => {
-  particleSystem.startColor = Cesium.Color.fromCssColorString(v)
+  if (particleSystem) particleSystem.startColor = Cesium.Color.fromCssColorString(v)
 })
 watch(endColor, (v) => {
-  particleSystem.endColor = Cesium.Color.fromCssColorString(v)
+  if (particleSystem) particleSystem.endColor = Cesium.Color.fromCssColorString(v)
 })
 watch(startScale, (v) => {
-  particleSystem.startScale = v
+  if (particleSystem) particleSystem.startScale = v
 })
 watch(endScale, (v) => {
-  particleSystem.endScale = v
-})
-
-props.viewer.camera.flyTo({
-  destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 600),
+  if (particleSystem) particleSystem.endScale = v
 })
 
 onUnmounted(() => {
-  scene.primitives.remove(particleSystem)
+  cancelled = true
+  if (particleSystem) {
+    scene.primitives.remove(particleSystem)
+    particleSystem = null
+  }
 })
 </script>
 
