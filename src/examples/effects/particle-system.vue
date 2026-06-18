@@ -3,6 +3,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import * as Cesium from 'cesium'
 import ExamplePanel from '@/components/examples/ExamplePanel.vue'
 import { NSlider, NColorPicker } from 'naive-ui'
+import particleImg from './particle-flame.png'
 
 const props = defineProps<{ viewer: Cesium.Viewer }>()
 const scene = props.viewer.scene
@@ -31,9 +32,8 @@ onMounted(async () => {
   if (cancelled || !props.viewer || props.viewer.isDestroyed()) return
 
   particleSystem = new Cesium.ParticleSystem({
-    image:
-      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVQYlWNg+M9AAiYmBn5GRgY0AAB/AAv+2m/rAAAAAElFTkSuQmCC',
-    imageSize: new Cesium.Cartesian2(25, 25),
+    image: particleImg,
+    imageSize: new Cesium.Cartesian2(80, 80),  // 匹配火焰粒子贴图 82x77
     startColor: Cesium.Color.DEEPSKYBLUE.withAlpha(0.8),
     endColor: Cesium.Color.WHITE.withAlpha(0.1),
     startScale: 1.0,

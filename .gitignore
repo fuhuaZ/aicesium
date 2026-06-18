@@ -6,10 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+.omo
 #.trae
 #.vscode
-
+.playwright-mcp
 node_modules
 .DS_Store
 dist
