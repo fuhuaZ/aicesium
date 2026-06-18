@@ -10,16 +10,19 @@ const scene = props.viewer.scene
 
 let particleSystem: Cesium.ParticleSystem | null = null
 let cancelled = false
+let previousShouldAnimate = false
 
 onMounted(async () => {
+  previousShouldAnimate = props.viewer.clock.shouldAnimate
+  props.viewer.clock.shouldAnimate = true
+
   let height = 100
 
   try {
     const cartographic = Cesium.Cartographic.fromDegrees(116.4, 39.9)
-    const [updated] = await Cesium.sampleTerrainMostDetailed(
-      props.viewer.terrainProvider,
-      [cartographic],
-    )
+    const [updated] = await Cesium.sampleTerrainMostDetailed(props.viewer.terrainProvider, [
+      cartographic,
+    ])
     if (!cancelled && updated && props.viewer && !props.viewer.isDestroyed()) {
       height = (updated.height ?? 0) + 100
     } else {
@@ -31,9 +34,11 @@ onMounted(async () => {
 
   if (cancelled || !props.viewer || props.viewer.isDestroyed()) return
 
+  const position = Cesium.Cartesian3.fromDegrees(116.4, 39.9, height)
+
   particleSystem = new Cesium.ParticleSystem({
     image: particleImg,
-    imageSize: new Cesium.Cartesian2(80, 80),  // 匹配火焰粒子贴图 82x77
+    imageSize: new Cesium.Cartesian2(80, 80), // 匹配火焰粒子贴图 82x77
     startColor: Cesium.Color.ORANGERED.withAlpha(0.9),
     endColor: Cesium.Color.ORANGE.withAlpha(0.6),
     startScale: 2.0,
@@ -46,15 +51,18 @@ onMounted(async () => {
     lifetime: 16.0,
     loop: true,
     emitter: new Cesium.CircleEmitter(10),
-    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(
-      Cesium.Cartesian3.fromDegrees(116.4, 39.9, height),
-    ),
+    modelMatrix: Cesium.Transforms.eastNorthUpToFixedFrame(position),
   })
 
   scene.primitives.add(particleSystem)
 
   props.viewer.camera.flyTo({
-    destination: Cesium.Cartesian3.fromDegrees(116.4, 39.9, 600),
+    destination: Cesium.Cartesian3.fromDegrees(116.395, 39.895, height + 350),
+    orientation: {
+      heading: Cesium.Math.toRadians(35),
+      pitch: Cesium.Math.toRadians(-35),
+      roll: 0,
+    },
   })
 })
 
@@ -99,6 +107,7 @@ watch(endScale, (v) => {
 
 onUnmounted(() => {
   cancelled = true
+  props.viewer.clock.shouldAnimate = previousShouldAnimate
   if (particleSystem) {
     scene.primitives.remove(particleSystem)
     particleSystem = null
