@@ -38,7 +38,7 @@ onMounted(async () => {
 
   particleSystem = new Cesium.ParticleSystem({
     image: particleImg,
-    imageSize: new Cesium.Cartesian2(80, 80), // 匹配火焰粒子贴图 82x77
+    imageSize: new Cesium.Cartesian2(5, 5), // 匹配火焰粒子贴图 82x77
     startColor: Cesium.Color.ORANGERED.withAlpha(0.9),
     endColor: Cesium.Color.ORANGE.withAlpha(0.6),
     startScale: 2.0,

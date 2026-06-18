@@ -126,9 +126,14 @@ function applyModelShader(video: HTMLVideoElement) {
     mode: Cesium.CustomShaderMode.MODIFY_MATERIAL,
     fragmentShaderText: `
       void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
-        vec4 textureColor = texture(u_normalMap, fsInput.attributes.texCoord_0);
-        material.diffuse = mix(material.diffuse, textureColor.rgb, 0.9);
-        material.alpha = 1.0;
+        // ScreenSurface vertices are marked red (COLOR_0.r = 1.0);
+        // all other meshes are black (COLOR_0.r = 0.0).
+        // Only apply video texture to the screen.
+        if (fsInput.attributes.color_0.r > 0.5) {
+          vec4 textureColor = texture(u_normalMap, fsInput.attributes.texCoord_0);
+          material.diffuse = textureColor.rgb;
+          material.alpha = 1.0;
+        }
       }
     `,
     uniforms: {
@@ -250,29 +255,29 @@ function createGroundProjection(video: HTMLVideoElement) {
 // ===================== 加载 3D 模型 =====================
 async function loadModel() {
   try {
-    const modelPos = Cesium.Cartesian3.fromDegrees(centerLng + 0.002, centerLat - 0.004, 1000)
-    const heading = Cesium.Math.toRadians(225)
+    const modelPos = Cesium.Cartesian3.fromDegrees(centerLng + 0.002, centerLat - 0.004, 1500)
+    const heading = Cesium.Math.toRadians(315)
     const pitch = 0
     const roll = 0
     const hpr = new Cesium.HeadingPitchRoll(heading, pitch, roll)
 
     modelEntity = viewer.entities.add({
-      name: 'Room Model',
+      name: 'Computer Model',
       position: modelPos,
       orientation: Cesium.Transforms.headingPitchRollQuaternion(modelPos, hpr),
       model: {
-        uri: '/models/Room.gltf',
-        scale: 1.0,
-        minimumPixelSize: 80,
-        maximumScale: 500,
+        uri: '/models/computer.glb',
+        scale: 3.0,
+        minimumPixelSize: 500,
+        maximumScale: 5000,
       },
     })
 
     await viewer.camera.flyTo({
-      destination: Cesium.Cartesian3.fromDegrees(centerLng + 0.006, centerLat - 0.003, 500),
+      destination: Cesium.Cartesian3.fromDegrees(centerLng + 0.004, centerLat - 0.002, 1200),
       orientation: {
-        heading: Cesium.Math.toRadians(15),
-        pitch: Cesium.Math.toRadians(-35),
+        heading: Cesium.Math.toRadians(135),
+        pitch: Cesium.Math.toRadians(-15),
         roll: 0,
       },
     })
@@ -281,7 +286,7 @@ async function loadModel() {
       applyModelShader(videoEl)
     }
   } catch {
-    console.warn('Failed to load Room model')
+    console.warn('Failed to load Computer model')
   }
 }
 
@@ -412,7 +417,7 @@ onUnmounted(() => {
     <!-- 提示 -->
     <div class="vf-hint">
       视频投射到 <strong>地面</strong> / <strong>竖直屏幕</strong> /
-      <strong>Room 模型表面</strong> 上， 可通过复选框独立开关
+      <strong>电脑屏幕</strong> 上， 可通过复选框独立开关
     </div>
   </ExamplePanel>
 </template>
