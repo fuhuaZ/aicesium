@@ -67,8 +67,7 @@ handler.setInputAction((event: Cesium.ScreenSpaceEventHandler.PositionedEvent) =
     }
     // 坐标字符串
     const c = Cesium.Cartographic.fromCartesian(cartesian)
-    const coord =
-      `${Cesium.Math.toDegrees(c.longitude).toFixed(4)}E, ${Cesium.Math.toDegrees(c.latitude).toFixed(4)}N, ${c.height.toFixed(1)}m`
+    const coord = `${Cesium.Math.toDegrees(c.longitude).toFixed(4)}E, ${Cesium.Math.toDegrees(c.latitude).toFixed(4)}N, ${c.height.toFixed(1)}m`
     pushLog('LEFT_CLICK', coord)
   }
 }, Cesium.ScreenSpaceEventType.LEFT_CLICK)

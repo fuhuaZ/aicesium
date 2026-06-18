@@ -47,7 +47,7 @@ function draw(): void {
       const y = (j + 0.5) * spacingY
       ctx.save()
       ctx.translate(x, y)
-      ctx.rotate(-22 * Math.PI / 180)
+      ctx.rotate((-22 * Math.PI) / 180)
       ctx.fillText(timeStr, 0, 0)
       ctx.restore()
     }
@@ -89,12 +89,7 @@ onUnmounted(() => {
 
 <template>
   <Teleport to="body">
-    <canvas
-      ref="canvasRef"
-      aria-hidden="true"
-      role="presentation"
-      data-watermark
-    />
+    <canvas ref="canvasRef" aria-hidden="true" role="presentation" data-watermark />
   </Teleport>
 </template>
 
