@@ -34,10 +34,10 @@ onMounted(async () => {
   particleSystem = new Cesium.ParticleSystem({
     image: particleImg,
     imageSize: new Cesium.Cartesian2(80, 80),  // 匹配火焰粒子贴图 82x77
-    startColor: Cesium.Color.DEEPSKYBLUE.withAlpha(0.8),
-    endColor: Cesium.Color.WHITE.withAlpha(0.1),
-    startScale: 1.0,
-    endScale: 4.0,
+    startColor: Cesium.Color.ORANGERED.withAlpha(0.9),
+    endColor: Cesium.Color.ORANGE.withAlpha(0.6),
+    startScale: 2.0,
+    endScale: 3.0,
     minimumParticleLife: 1.0,
     maximumParticleLife: 3.0,
     minimumSpeed: 20.0,
@@ -64,10 +64,10 @@ const minSpeed = ref(20)
 const maxSpeed = ref(40)
 const minLife = ref(1.0)
 const maxLife = ref(3.0)
-const startColor = ref('rgba(0, 191, 255, 0.80)')
-const endColor = ref('rgba(255, 255, 255, 0.10)')
-const startScale = ref(1.0)
-const endScale = ref(4.0)
+const startColor = ref('rgba(255, 69, 0, 0.90)')
+const endColor = ref('rgba(255, 165, 0, 0.60)')
+const startScale = ref(2.0)
+const endScale = ref(3.0)
 
 watch(emissionRate, (v) => {
   if (particleSystem) particleSystem.emissionRate = v
