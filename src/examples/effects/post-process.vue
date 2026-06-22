@@ -20,33 +20,33 @@ const fragmentShaders: Record<Exclude<EffectType, 'none'>, string> = {
     uniform sampler2D colorTexture;
     uniform float threshold;
     uniform float intensity;
-    varying vec2 v_textureCoordinates;
+    in vec2 v_textureCoordinates;
     void main() {
-      vec4 color = texture2D(colorTexture, v_textureCoordinates);
+      vec4 color = texture(colorTexture, v_textureCoordinates);
       float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
       if (lum > threshold) {
-        gl_FragColor = color * intensity;
+        out_FragColor = color * intensity;
       } else {
-        gl_FragColor = color;
+        out_FragColor = color;
       }
     }
   `,
   nightVision: `
     uniform sampler2D colorTexture;
-    varying vec2 v_textureCoordinates;
+    in vec2 v_textureCoordinates;
     void main() {
-      vec4 color = texture2D(colorTexture, v_textureCoordinates);
+      vec4 color = texture(colorTexture, v_textureCoordinates);
       float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-      gl_FragColor = vec4(0.1, lum, 0.1, 1.0);
+      out_FragColor = vec4(0.1, lum, 0.1, 1.0);
     }
   `,
   grayscale: `
     uniform sampler2D colorTexture;
-    varying vec2 v_textureCoordinates;
+    in vec2 v_textureCoordinates;
     void main() {
-      vec4 color = texture2D(colorTexture, v_textureCoordinates);
+      vec4 color = texture(colorTexture, v_textureCoordinates);
       float lum = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-      gl_FragColor = vec4(vec3(lum), 1.0);
+      out_FragColor = vec4(vec3(lum), 1.0);
     }
   `,
 }
