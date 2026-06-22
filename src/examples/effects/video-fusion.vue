@@ -126,12 +126,17 @@ function applyModelShader(video: HTMLVideoElement) {
     mode: Cesium.CustomShaderMode.MODIFY_MATERIAL,
     fragmentShaderText: `
       void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
-        // ScreenSurface vertices are marked red (COLOR_0.r = 1.0);
-        // all other meshes are black (COLOR_0.r = 0.0).
-        // Only apply video texture to the screen.
-        if (fsInput.attributes.color_0.r > 0.5) {
-          vec4 textureColor = texture(u_normalMap, fsInput.attributes.texCoord_0);
+        // ScreenSurface: pure red (1,0,0,1); white meshes have g>0.5, black meshes have r<0.5
+        if (fsInput.attributes.color_0.r > 0.5 && fsInput.attributes.color_0.g < 0.5) {
+          // Generate UV from positionMC (glTF Y-up: X=width, Y=height)
+          // ScreenSurface X:[-0.14, 0.14], Y:[0.0175, 0.1959]
+          vec2 uv = vec2(
+            1.0 - (fsInput.attributes.positionMC.x + 0.14) / 0.28,
+            1.0 - (fsInput.attributes.positionMC.y - 0.0175) / 0.1784
+          );
+          vec4 textureColor = texture(u_normalMap, uv);
           material.diffuse = textureColor.rgb;
+          material.emissive = textureColor.rgb;
           material.alpha = 1.0;
         }
       }
@@ -268,7 +273,7 @@ async function loadModel() {
       model: {
         uri: '/models/computer.glb',
         scale: 3.0,
-        minimumPixelSize: 500,
+        minimumPixelSize: 5000,
         maximumScale: 5000,
       },
     })
@@ -416,8 +421,8 @@ onUnmounted(() => {
 
     <!-- 提示 -->
     <div class="vf-hint">
-      视频投射到 <strong>地面</strong> / <strong>竖直屏幕</strong> /
-      <strong>电脑屏幕</strong> 上， 可通过复选框独立开关
+      视频投射到 <strong>地面</strong> / <strong>竖直屏幕</strong> / <strong>电脑屏幕</strong> 上，
+      可通过复选框独立开关
     </div>
   </ExamplePanel>
 </template>
